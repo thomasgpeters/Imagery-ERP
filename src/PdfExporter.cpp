@@ -63,22 +63,28 @@ std::string PdfExporter::generateHtml(const ProjectData& data, const Estimate& e
     // Component breakdown
     html << "<h2>Component Breakdown</h2>";
     html << "<table><tr><th>Component</th><th>Statement of Work</th>"
-         << "<th class='right'>Hours</th><th class='right'>Cost</th>"
+         << "<th class='right'>Hours</th><th class='right'>Labor</th>"
+         << "<th class='right'>Materials</th>"
+         << "<th class='right'>Total Cost</th>"
          << "<th class='right'>Sell Price</th></tr>";
 
-    double totalH = 0, totalC = 0, totalS = 0;
+    double totalH = 0, totalC = 0, totalS = 0, totalMat = 0;
     for (int cid : estimate.componentIds) {
         for (auto& comp : data.components) {
             if (comp.id == cid) {
                 double h = comp.totalHours();
+                double labor = data.componentLaborCost(comp);
+                double mat = data.componentMaterialCost(comp);
                 double c = data.componentCost(comp);
                 double s = c * (1.0 + estimate.markupPct / 100.0);
-                totalH += h; totalC += c; totalS += s;
+                totalH += h; totalC += c; totalS += s; totalMat += mat;
 
                 html << "<tr><td><strong>" << comp.name << "</strong><br>"
                      << "<small>" << comp.description << "</small></td>"
                      << "<td><small>" << comp.statementOfWork << "</small></td>"
                      << "<td class='right'>" << formatNumber(h, 0) << "</td>"
+                     << "<td class='right'>" << formatCurrency(labor) << "</td>"
+                     << "<td class='right'>" << (mat > 0 ? formatCurrency(mat) : "&mdash;") << "</td>"
                      << "<td class='right'>" << formatCurrency(c) << "</td>"
                      << "<td class='right'>" << formatCurrency(s) << "</td></tr>";
                 break;
@@ -88,6 +94,8 @@ std::string PdfExporter::generateHtml(const ProjectData& data, const Estimate& e
 
     html << "<tr class='total'><td>Total</td><td></td>"
          << "<td class='right'>" << formatNumber(totalH, 0) << "</td>"
+         << "<td class='right'>" << formatCurrency(totalC - totalMat) << "</td>"
+         << "<td class='right'>" << formatCurrency(totalMat) << "</td>"
          << "<td class='right'>" << formatCurrency(totalC) << "</td>"
          << "<td class='right'>" << formatCurrency(totalS) << "</td></tr>";
     html << "</table>";

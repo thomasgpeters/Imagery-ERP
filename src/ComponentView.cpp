@@ -226,6 +226,94 @@ void ComponentView::refresh()
                 refresh();
             }
         });
+
+        // ---- Material requirements ------------------------------------------
+        detail->addWidget(ppc::xhtml("<h4 class=\"detail-section\">Material Requirements</h4>"));
+
+        if (!comp.materials.empty()) {
+            auto matTable = detail->addWidget(std::make_unique<Wt::WTable>());
+            matTable->setStyleClass("data-table data-table-compact");
+            matTable->setHeaderCount(1);
+
+            matTable->elementAt(0, 0)->addWidget(std::make_unique<Wt::WText>("Material"));
+            matTable->elementAt(0, 1)->addWidget(std::make_unique<Wt::WText>("Unit Cost"));
+            matTable->elementAt(0, 1)->setStyleClass("cell-right");
+            matTable->elementAt(0, 2)->addWidget(std::make_unique<Wt::WText>("Qty"));
+            matTable->elementAt(0, 2)->setStyleClass("cell-right");
+            matTable->elementAt(0, 3)->addWidget(std::make_unique<Wt::WText>("Cost"));
+            matTable->elementAt(0, 3)->setStyleClass("cell-right");
+            matTable->elementAt(0, 4)->addWidget(std::make_unique<Wt::WText>(""));
+
+            for (int mi = 0; mi < (int)comp.materials.size(); mi++) {
+                auto& cm = comp.materials[mi];
+                auto* mat = data_.findMaterial(cm.materialId);
+                std::string matName = mat ? mat->name : "Unknown";
+                double uc = mat ? mat->unitCost : 0.0;
+                int mrow = mi + 1;
+
+                matTable->elementAt(mrow, 0)->addWidget(std::make_unique<Wt::WText>(matName));
+                matTable->elementAt(mrow, 1)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(uc)));
+                matTable->elementAt(mrow, 1)->setStyleClass("cell-right");
+
+                auto qtySpin = matTable->elementAt(mrow, 2)->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
+                qtySpin->setRange(0, 10000);
+                qtySpin->setValue(cm.quantity);
+                qtySpin->setDecimals(1);
+                qtySpin->setStyleClass("input-field input-sm");
+                matTable->elementAt(mrow, 2)->setStyleClass("cell-right");
+                int matIdx = mi;
+                qtySpin->valueChanged().connect([this, compIdx, matIdx](double val) {
+                    data_.components[compIdx].materials[matIdx].quantity = val;
+                    refresh();
+                });
+
+                matTable->elementAt(mrow, 3)->addWidget(std::make_unique<Wt::WText>(
+                    ppc::formatCurrency(cm.quantity * uc)));
+                matTable->elementAt(mrow, 3)->setStyleClass("cell-right");
+
+                auto delMatBtn = matTable->elementAt(mrow, 4)->addWidget(std::make_unique<Wt::WPushButton>("Remove"));
+                delMatBtn->setStyleClass("btn btn-danger btn-xs");
+                delMatBtn->clicked().connect([this, compIdx, matIdx]() {
+                    auto& mats = data_.components[compIdx].materials;
+                    mats.erase(mats.begin() + matIdx);
+                    refresh();
+                });
+            }
+        }
+
+        // Add material to component
+        if (!data_.materials.empty()) {
+            auto addMatRow = detail->addWidget(std::make_unique<Wt::WContainerWidget>());
+            addMatRow->setStyleClass("form-row-inline mt-1");
+            addMatRow->addWidget(ppc::xhtml("<span class=\"field-label\">Add Material:</span>"));
+
+            auto matCombo = addMatRow->addWidget(std::make_unique<Wt::WComboBox>());
+            matCombo->setStyleClass("input-field");
+            for (auto& m : data_.materials) matCombo->addItem(m.name);
+
+            addMatRow->addWidget(ppc::xhtml("<span class=\"field-label\">Qty:</span>"));
+            auto qtyInput = addMatRow->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
+            qtyInput->setRange(0, 10000);
+            qtyInput->setValue(1);
+            qtyInput->setDecimals(1);
+            qtyInput->setStyleClass("input-field input-sm");
+
+            auto addMatBtn = addMatRow->addWidget(std::make_unique<Wt::WPushButton>("Add"));
+            addMatBtn->setStyleClass("btn btn-primary btn-sm");
+            addMatBtn->clicked().connect([this, compIdx, matCombo, qtyInput]() {
+                int selIdx = matCombo->currentIndex();
+                if (selIdx >= 0 && selIdx < (int)data_.materials.size()) {
+                    ppc::ComponentMaterial cm;
+                    cm.materialId = data_.materials[selIdx].id;
+                    cm.quantity = qtyInput->value();
+                    data_.components[compIdx].materials.push_back(cm);
+                    refresh();
+                }
+            });
+        } else {
+            detail->addWidget(ppc::xhtml(
+                "<p class=\"text-muted\">No materials defined yet. Add materials in the Materials &amp; Expenses view.</p>"));
+        }
     }
 
     // ---- Add new component form ---------------------------------------------

@@ -115,6 +115,11 @@ body > div,
     width: 100% !important;
     overflow: hidden !important;
 }
+/* Ensure all Wt dialogs get an opaque background by default */
+.Wt-dialog {
+    background: var(--bg-card) !important;
+    color: var(--text-primary);
+}
 
 /* ---- App Shell (row: sidebar | main column) ------------------------------ */
 .app-shell {
@@ -498,14 +503,20 @@ body > div,
 }
 
 /* ---- Settings Dialog ----------------------------------------------------- */
-.settings-dialog .Wt-dialog {
+/* Both classes land on the same element, so use combined selector (no space) */
+.settings-dialog.Wt-dialog {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
-    background: var(--bg-card);
+    background: var(--bg-card) !important;
     color: var(--text-primary);
+    overflow: hidden;
 }
-.settings-dialog .titlebar {
+/* Wt wraps content in a .body div inside the dialog */
+.settings-dialog.Wt-dialog .body {
+    background: var(--bg-card);
+}
+.settings-dialog.Wt-dialog .titlebar {
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
@@ -513,8 +524,13 @@ body > div,
     font-weight: 600;
     border-radius: 12px 12px 0 0;
 }
+/* Modal backdrop */
+.Wt-dialogcover {
+    background: rgba(0, 0, 0, 0.45) !important;
+}
 .settings-content {
     padding: 20px 24px;
+    background: var(--bg-card);
 }
 .settings-section-title {
     font-size: 13px;
@@ -530,6 +546,7 @@ body > div,
 .settings-field .field-label {
     display: block;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 .settings-hint {
     font-size: 12px;
@@ -547,6 +564,7 @@ body > div,
     gap: 8px;
     padding: 12px 24px 16px;
     border-top: 1px solid var(--border-color);
+    background: var(--bg-card);
 }
 
 /* ---- Work Area ----------------------------------------------------------- */
@@ -1200,6 +1218,85 @@ body > div,
     .nav-icon { width: auto; }
     .view-panel { padding: 16px; }
 }
+
+/* ---- Inline Icons (role, material) --------------------------------------- */
+.role-icon {
+    display: inline-block;
+    font-size: 14px;
+    opacity: 0.7;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.material-icon {
+    display: inline-block;
+    font-size: 14px;
+    opacity: 0.7;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* ---- Material Summary Bar ----------------------------------------------- */
+.material-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    margin: 16px 0;
+    background: var(--bg-callout);
+    border: 1px solid var(--accent-blue);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 8px;
+    font-size: 14px;
+}
+.msb-label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.msb-detail {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+.msb-value {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent-blue);
+    margin-left: auto;
+}
+.msb-sell {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent-green);
+}
+
+/* ---- Material Component Header ------------------------------------------ */
+.material-comp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    margin-top: 16px;
+    margin-bottom: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+.mch-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+.mch-total {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent-blue);
+}
+
+/* ---- Material Category Badges ------------------------------------------- */
+.badge-material   { background: #e0e7ff; color: #3730a3; }
+.badge-travel     { background: #fef3c7; color: #92400e; }
+.badge-software   { background: #dbeafe; color: #1e40af; }
+.badge-equipment  { background: #fce7f3; color: #9d174d; }
+.badge-office     { background: #d1fae5; color: #065f46; }
 
 /* ---- Print --------------------------------------------------------------- */
 @media print {

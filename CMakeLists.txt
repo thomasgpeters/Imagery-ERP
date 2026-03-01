@@ -72,6 +72,7 @@ add_executable(project_planner
     src/CostingView.cpp
     src/QuoteView.cpp
     src/ChangeOrderView.cpp
+    src/MaterialView.cpp
     src/PdfExporter.cpp
 )
 

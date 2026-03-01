@@ -22,6 +22,7 @@
 #include "CostingView.h"
 #include "QuoteView.h"
 #include "ChangeOrderView.h"
+#include "MaterialView.h"
 
 App::App(const Wt::WEnvironment& env)
     : WApplication(env)
@@ -72,7 +73,7 @@ void App::buildLayout()
     workarea_->setStyleClass("app-workarea");
 
     // Create all views (hidden by default — showView reveals one at a time)
-    // Fixed order: 0=Dashboard, 1=Roles, 2=Components, 3=Sprints, 4=Costing, 5=Quote, 6=ChangeOrders
+    // Fixed order: 0=Dashboard, 1=Roles, 2=Components, 3=Sprints, 4=Costing, 5=Quote, 6=ChangeOrders, 7=Materials
     auto dv  = std::make_unique<DashboardView>(data_);   dashboardView_   = dv.get();
     auto rv  = std::make_unique<ResourceView>(data_);    resourceView_    = rv.get();
     auto cv  = std::make_unique<ComponentView>(data_);   componentView_   = cv.get();
@@ -80,6 +81,7 @@ void App::buildLayout()
     auto csv = std::make_unique<CostingView>(data_);     costingView_     = csv.get();
     auto qv  = std::make_unique<QuoteView>(data_);       quoteView_       = qv.get();
     auto cov = std::make_unique<ChangeOrderView>(data_); changeOrderView_ = cov.get();
+    auto mv  = std::make_unique<MaterialView>(data_);    materialView_    = mv.get();
 
     workarea_->addWidget(std::move(dv));
     workarea_->addWidget(std::move(rv));
@@ -88,6 +90,7 @@ void App::buildLayout()
     workarea_->addWidget(std::move(csv));
     workarea_->addWidget(std::move(qv));
     workarea_->addWidget(std::move(cov));
+    workarea_->addWidget(std::move(mv));
 }
 
 void App::buildTopbar()
@@ -234,7 +237,8 @@ void App::buildNavForRole()
         items = {
             {"&#9632;", "Dashboard",            0, true},
             {"&#9881;", "Roles &amp; Rates",    1, false},
-            {"&#9638;", "Components &amp; SoW", 2, true},
+            {"&#9638;", "Components &amp; SoW", 2, false},
+            {"&#9863;", "Materials &amp; Expenses", 7, true},
             {"&#9733;", "Cost Analysis",        4, false},
             {"&#9830;", "Quote Builder",        5, false},
         };
@@ -306,7 +310,7 @@ void App::updateUserButton()
 
 void App::showView(int viewIndex)
 {
-    if (viewIndex < 0 || viewIndex > 6) return;
+    if (viewIndex < 0 || viewIndex > 7) return;
 
     // Hide all views
     for (int i = 0; i < workarea_->count(); i++) {
@@ -348,6 +352,7 @@ void App::refreshView(int viewIndex)
         case 4: costingView_->refresh();     break;
         case 5: quoteView_->refresh();       break;
         case 6: changeOrderView_->refresh(); break;
+        case 7: materialView_->refresh();    break;
     }
 }
 

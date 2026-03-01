@@ -44,6 +44,8 @@ void DashboardView::refresh()
     addCard("Profit Margin",     ppc::formatCurrency(data_.getMargin()),     ppc::formatPercent(data_.markupPct), "accent-purple");
     addCard("Blended Cost Rate", ppc::formatCurrency(data_.getBlendedCostRate()) + "/hr", "weighted average", "accent-orange");
     addCard("Blended Sell Rate", ppc::formatCurrency(data_.getBlendedSellRate()) + "/hr", "weighted average", "accent-teal");
+    double totalMatCost = data_.getTotalMaterialCost();
+    addCard("Material Costs",    ppc::formatCurrency(totalMatCost),          std::to_string(data_.materials.size()) + " items catalogued", "accent-red");
     addCard("Sprints",           std::to_string(data_.sprints.size()),       std::to_string(data_.sprintLengthWeeks) + "-week intervals", "accent-blue");
     addCard("Components",        std::to_string(data_.components.size()),    "estimable units of work", "accent-orange");
 
@@ -68,7 +70,8 @@ void DashboardView::refresh()
         double totalCost = data_.getRoleTotalCost(role.id);
 
         c = 0;
-        roleTable->elementAt(row, c++)->addWidget(std::make_unique<Wt::WText>(role.name));
+        roleTable->elementAt(row, c++)->addWidget(ppc::xhtml(
+            "<span class=\"role-icon\">&#128100;</span> " + role.name));
         roleTable->elementAt(row, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(role.baseRate)));
         roleTable->elementAt(row, c++)->setStyleClass("cell-right");
         roleTable->elementAt(row, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(role.overheadRate)));
@@ -151,6 +154,63 @@ void DashboardView::refresh()
         phaseTable->elementAt(trow, 4)->setStyleClass("cell-right cell-bold");
         for (int i = 0; i < 5; i++)
             phaseTable->elementAt(trow, i)->addStyleClass("total-row");
+    }
+
+    // ---- Material summary table ---------------------------------------------
+    if (!data_.materials.empty()) {
+        content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Material Summary</h3>"));
+        auto matTable = content_->addWidget(std::make_unique<Wt::WTable>());
+        matTable->setStyleClass("data-table");
+        matTable->setHeaderCount(1);
+
+        c = 0;
+        for (auto& h : {"Material", "Category", "Unit Cost", "Qty Used", "Total Cost", "Sell Value"}) {
+            matTable->elementAt(0, c)->addWidget(std::make_unique<Wt::WText>(h));
+            matTable->elementAt(0, c)->setStyleClass(c >= 2 ? "cell-right" : "");
+            c++;
+        }
+
+        double grandMatCost = 0, grandMatSell = 0;
+        int mrow = 1;
+        for (auto& mat : data_.materials) {
+            double totalQty = 0;
+            for (auto& comp : data_.components)
+                for (auto& cm : comp.materials)
+                    if (cm.materialId == mat.id) totalQty += cm.quantity;
+
+            if (totalQty <= 0) continue;
+            double lineCost = totalQty * mat.unitCost;
+            double lineSell = lineCost * (1.0 + data_.markupPct / 100.0);
+            grandMatCost += lineCost;
+            grandMatSell += lineSell;
+
+            c = 0;
+            matTable->elementAt(mrow, c++)->addWidget(ppc::xhtml(
+                "<span class=\"material-icon\">&#128230;</span> " + mat.name));
+            matTable->elementAt(mrow, c++)->addWidget(std::make_unique<Wt::WText>(mat.category));
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(mat.unitCost)));
+            matTable->elementAt(mrow, c++)->setStyleClass("cell-right");
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(
+                ppc::formatNumber(totalQty, 1) + " " + mat.unit + (totalQty != 1.0 ? "s" : "")));
+            matTable->elementAt(mrow, c++)->setStyleClass("cell-right");
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(lineCost)));
+            matTable->elementAt(mrow, c++)->setStyleClass("cell-right");
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(lineSell)));
+            matTable->elementAt(mrow, c)->setStyleClass("cell-right");
+            mrow++;
+        }
+
+        // Totals row
+        matTable->elementAt(mrow, 0)->addWidget(std::make_unique<Wt::WText>("Total"));
+        matTable->elementAt(mrow, 1)->addWidget(std::make_unique<Wt::WText>(""));
+        matTable->elementAt(mrow, 2)->addWidget(std::make_unique<Wt::WText>(""));
+        matTable->elementAt(mrow, 3)->addWidget(std::make_unique<Wt::WText>(""));
+        matTable->elementAt(mrow, 4)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(grandMatCost)));
+        matTable->elementAt(mrow, 4)->setStyleClass("cell-right cell-bold");
+        matTable->elementAt(mrow, 5)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(grandMatSell)));
+        matTable->elementAt(mrow, 5)->setStyleClass("cell-right cell-bold");
+        for (int i = 0; i < 6; i++)
+            matTable->elementAt(mrow, i)->addStyleClass("total-row");
     }
 
     // ---- Agile ceremony overhead per sprint ---------------------------------

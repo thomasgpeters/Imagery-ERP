@@ -218,6 +218,70 @@ void CostingView::refresh()
     for (int i = 0; i < 6; i++)
         phaseTable->elementAt(trow, i)->addStyleClass("total-row");
 
+    // ---- Material Costs Summary --------------------------------------------
+    double totalMatCost = data_.getTotalMaterialCost();
+    if (totalMatCost > 0) {
+        double matSell = totalMatCost * (1.0 + data_.markupPct / 100.0);
+        content_->addWidget(ppc::xhtml(
+            "<h3 class=\"section-title\">Material &amp; Expense Costs</h3>"
+        ));
+
+        auto matTable = content_->addWidget(std::make_unique<Wt::WTable>());
+        matTable->setStyleClass("data-table");
+        matTable->setHeaderCount(1);
+
+        c = 0;
+        for (auto& h : {"Material", "Category", "Qty", "Unit Cost", "Total Cost"}) {
+            matTable->elementAt(0, c)->addWidget(std::make_unique<Wt::WText>(h));
+            matTable->elementAt(0, c)->setStyleClass(c >= 2 ? "cell-right" : "");
+            c++;
+        }
+
+        int mrow = 1;
+        for (auto& mat : data_.materials) {
+            double totalQty = 0;
+            for (auto& comp : data_.components)
+                for (auto& cm : comp.materials)
+                    if (cm.materialId == mat.id) totalQty += cm.quantity;
+            if (totalQty <= 0) continue;
+
+            c = 0;
+            matTable->elementAt(mrow, c++)->addWidget(std::make_unique<Wt::WText>(mat.name));
+            matTable->elementAt(mrow, c++)->addWidget(std::make_unique<Wt::WText>(mat.category));
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatNumber(totalQty, 1)));
+            matTable->elementAt(mrow, c++)->setStyleClass("cell-right");
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(mat.unitCost)));
+            matTable->elementAt(mrow, c++)->setStyleClass("cell-right");
+            matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(totalQty * mat.unitCost)));
+            matTable->elementAt(mrow, c)->setStyleClass("cell-right");
+            mrow++;
+        }
+
+        // Total row
+        matTable->elementAt(mrow, 0)->addWidget(std::make_unique<Wt::WText>("Total Materials"));
+        matTable->elementAt(mrow, 1)->addWidget(std::make_unique<Wt::WText>(""));
+        matTable->elementAt(mrow, 2)->addWidget(std::make_unique<Wt::WText>(""));
+        matTable->elementAt(mrow, 3)->addWidget(std::make_unique<Wt::WText>(""));
+        matTable->elementAt(mrow, 4)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(totalMatCost)));
+        matTable->elementAt(mrow, 4)->setStyleClass("cell-right cell-bold");
+        for (int i2 = 0; i2 < 5; i2++)
+            matTable->elementAt(mrow, i2)->addStyleClass("total-row");
+
+        // Combined project total callout
+        double laborCost = tpc; // from phased pricing totals above
+        double combinedCost = laborCost + totalMatCost;
+        double combinedSell = combinedCost * (1.0 + data_.markupPct / 100.0);
+        content_->addWidget(ppc::xhtml(
+            "<div class=\"material-summary-bar\">"
+            "<span class=\"msb-label\">Combined Project Total:</span>"
+            "<span class=\"msb-detail\">Labor " + ppc::formatCurrency(laborCost) +
+            " + Materials " + ppc::formatCurrency(totalMatCost) + "</span>"
+            "<span class=\"msb-value\">" + ppc::formatCurrency(combinedCost) + " cost</span>"
+            "<span class=\"msb-sell\">" + ppc::formatCurrency(combinedSell) + " sell</span>"
+            "</div>"
+        ));
+    }
+
     // Recalculate button
     auto recalcBtn = content_->addWidget(std::make_unique<Wt::WPushButton>("Recalculate All"));
     recalcBtn->setStyleClass("btn btn-secondary mt-1");
