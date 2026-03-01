@@ -377,6 +377,16 @@ body > div,
     border-radius: 12px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+.settings-dialog .titlebar {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 20px;
+    font-weight: 600;
+    border-radius: 12px 12px 0 0;
 }
 .settings-content {
     padding: 20px 24px;
@@ -805,6 +815,20 @@ body > div,
 .sprint-components {
     margin: 8px 0;
 }
+.sprint-comp-item-wrap {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: var(--bg-tertiary);
+    font-size: 13px;
+    overflow: hidden;
+}
+.sprint-comp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+}
 .sprint-comp-item {
     display: flex;
     align-items: center;
@@ -819,6 +843,14 @@ body > div,
 .comp-name  { flex: 1; font-weight: 500; color: var(--text-primary); }
 .comp-hours { color: var(--text-secondary); font-weight: 500; min-width: 60px; text-align: right; }
 .comp-cost  { color: var(--accent-blue); font-weight: 600; min-width: 90px; text-align: right; }
+.sprint-sow {
+    display: block;
+    padding: 6px 12px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+}
 
 .sprint-ceremony-summary {
     margin-top: 10px;
