@@ -451,7 +451,7 @@ body > div,
 /* ---- Metric Cards -------------------------------------------------------- */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 28px;
 }
@@ -1052,7 +1052,7 @@ body > div,
 @media (max-width: 1024px) {
     .app-sidebar { width: 210px; }
     .view-panel  { padding: 20px; }
-    .metrics-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
     .app-sidebar { width: 56px; }
