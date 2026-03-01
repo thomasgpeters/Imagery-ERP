@@ -88,7 +88,7 @@ void QuoteView::refresh()
         compTable->setHeaderCount(1);
 
         int c = 0;
-        for (auto& h : {"Component", "Hours", "Cost", "Sell"}) {
+        for (auto& h : {"Component", "Hours", "Labor", "Materials", "Total Cost", "Sell"}) {
             compTable->elementAt(0, c)->addWidget(std::make_unique<Wt::WText>(h));
             compTable->elementAt(0, c)->setStyleClass(c >= 1 ? "cell-right" : "");
             c++;
@@ -99,16 +99,23 @@ void QuoteView::refresh()
             for (auto& comp : data_.components) {
                 if (comp.id == cid) {
                     double hrs = comp.totalHours();
-                    double cost = data_.componentCost(comp);
+                    double laborCost = data_.componentLaborCost(comp);
+                    double matCost = data_.componentMaterialCost(comp);
+                    double totalCost = data_.componentCost(comp);
                     double sell = data_.componentSell(comp);
 
                     compTable->elementAt(crow, 0)->addWidget(std::make_unique<Wt::WText>(comp.name));
                     compTable->elementAt(crow, 1)->addWidget(std::make_unique<Wt::WText>(ppc::formatNumber(hrs, 0)));
                     compTable->elementAt(crow, 1)->setStyleClass("cell-right");
-                    compTable->elementAt(crow, 2)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(cost)));
+                    compTable->elementAt(crow, 2)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(laborCost)));
                     compTable->elementAt(crow, 2)->setStyleClass("cell-right");
-                    compTable->elementAt(crow, 3)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(sell)));
+                    compTable->elementAt(crow, 3)->addWidget(std::make_unique<Wt::WText>(
+                        matCost > 0 ? ppc::formatCurrency(matCost) : "—"));
                     compTable->elementAt(crow, 3)->setStyleClass("cell-right");
+                    compTable->elementAt(crow, 4)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(totalCost)));
+                    compTable->elementAt(crow, 4)->setStyleClass("cell-right cell-bold");
+                    compTable->elementAt(crow, 5)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(sell)));
+                    compTable->elementAt(crow, 5)->setStyleClass("cell-right");
                     crow++;
                     break;
                 }

@@ -18,6 +18,7 @@ class SprintView;
 class CostingView;
 class QuoteView;
 class ChangeOrderView;
+class MaterialView;
 
 enum class AppRole { Planning, Execution };
 
@@ -56,7 +57,7 @@ private:
 
     // Views — stored in workarea in fixed order:
     //   0=Dashboard, 1=Roles&Rates, 2=Components, 3=Sprints,
-    //   4=CostAnalysis, 5=QuoteBuilder, 6=ChangeOrders
+    //   4=CostAnalysis, 5=QuoteBuilder, 6=ChangeOrders, 7=Materials
     DashboardView*   dashboardView_   = nullptr;
     ResourceView*    resourceView_    = nullptr;
     ComponentView*   componentView_   = nullptr;
@@ -64,6 +65,7 @@ private:
     CostingView*     costingView_     = nullptr;
     QuoteView*       quoteView_       = nullptr;
     ChangeOrderView* changeOrderView_ = nullptr;
+    MaterialView*    materialView_    = nullptr;
 
     void buildLayout();
     void buildSidebar();

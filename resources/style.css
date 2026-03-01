@@ -1219,6 +1219,85 @@ body > div,
     .view-panel { padding: 16px; }
 }
 
+/* ---- Inline Icons (role, material) --------------------------------------- */
+.role-icon {
+    display: inline-block;
+    font-size: 14px;
+    opacity: 0.7;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.material-icon {
+    display: inline-block;
+    font-size: 14px;
+    opacity: 0.7;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* ---- Material Summary Bar ----------------------------------------------- */
+.material-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    margin: 16px 0;
+    background: var(--bg-callout);
+    border: 1px solid var(--accent-blue);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 8px;
+    font-size: 14px;
+}
+.msb-label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.msb-detail {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+.msb-value {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent-blue);
+    margin-left: auto;
+}
+.msb-sell {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent-green);
+}
+
+/* ---- Material Component Header ------------------------------------------ */
+.material-comp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    margin-top: 16px;
+    margin-bottom: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+.mch-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+.mch-total {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent-blue);
+}
+
+/* ---- Material Category Badges ------------------------------------------- */
+.badge-material   { background: #e0e7ff; color: #3730a3; }
+.badge-travel     { background: #fef3c7; color: #92400e; }
+.badge-software   { background: #dbeafe; color: #1e40af; }
+.badge-equipment  { background: #fce7f3; color: #9d174d; }
+.badge-office     { background: #d1fae5; color: #065f46; }
+
 /* ---- Print --------------------------------------------------------------- */
 @media print {
     .app-sidebar, .app-topbar { display: none; }
