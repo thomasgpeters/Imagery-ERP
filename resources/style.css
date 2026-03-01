@@ -587,6 +587,10 @@ body > div,
     color: #475569;
     margin-bottom: 24px;
     text-align: left;
+    background: #f8fafc;
+    border: 0.25px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
 }
 .about-meta {
     padding-top: 16px;
