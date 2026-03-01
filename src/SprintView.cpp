@@ -170,13 +170,24 @@ void SprintView::refresh()
                     if (comp.id == cid) {
                         double hrs = comp.totalHours();
                         double cost = data_.componentCost(comp);
-                        compList->addWidget(ppc::xhtml(
-                            "<div class=\"sprint-comp-item\">"
+
+                        auto compItem = compList->addWidget(std::make_unique<Wt::WContainerWidget>());
+                        compItem->setStyleClass("sprint-comp-item-wrap");
+
+                        compItem->addWidget(ppc::xhtml(
+                            "<div class=\"sprint-comp-row\">"
                             "<span class=\"comp-name\">" + comp.name + "</span>"
                             "<span class=\"comp-hours\">" + ppc::formatNumber(hrs, 0) + " hrs</span>"
                             "<span class=\"comp-cost\">" + ppc::formatCurrency(cost) + "</span>"
                             "</div>"
                         ));
+
+                        if (!comp.statementOfWork.empty()) {
+                            auto sowText = compItem->addWidget(
+                                std::make_unique<Wt::WText>(comp.statementOfWork, Wt::TextFormat::Plain));
+                            sowText->setStyleClass("sprint-sow");
+                        }
+
                         break;
                     }
                 }
