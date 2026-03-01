@@ -450,7 +450,7 @@ void App::showAboutDialog()
 
     // Close button
     auto footer = dialog->footer();
-    footer->setStyleClass("settings-footer");
+    footer->setStyleClass("settings-footer about-footer");
     auto closeBtn = footer->addWidget(std::make_unique<Wt::WPushButton>("Close"));
     closeBtn->setStyleClass("btn btn-primary");
     closeBtn->clicked().connect(dialog, &Wt::WDialog::accept);
