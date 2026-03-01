@@ -162,17 +162,15 @@ void App::buildSidebar()
     auto brand = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
     brand->setStyleClass("sidebar-brand");
 
-    // Logo placeholder — shows a fallback icon; user can drop a logo.png in resources
+    // Logo — light and dark variants, toggled via CSS theme class
     auto logoContainer = brand->addWidget(std::make_unique<Wt::WContainerWidget>());
     logoContainer->setStyleClass("sidebar-logo");
-    auto logoImg = logoContainer->addWidget(std::make_unique<Wt::WImage>("logo.png"));
-    logoImg->setStyleClass("sidebar-logo-img");
-    logoImg->setAlternateText("");
-    // If logo.png doesn't exist, hide image and show fallback icon
-    logoImg->setHidden(true);  // hidden by default; shown if file exists
-    logoContainer->addWidget(ppc::xhtml(
-        "<span class=\"sidebar-logo-fallback\">&#9672;</span>"
-    ));
+    auto logoLight = logoContainer->addWidget(std::make_unique<Wt::WImage>("images/ImageryBusinessLogo.png"));
+    logoLight->setStyleClass("sidebar-logo-img sidebar-logo-light");
+    logoLight->setAlternateText("Imagery Solutions");
+    auto logoDark = logoContainer->addWidget(std::make_unique<Wt::WImage>("images/ImageryBusinessLogo_white.png"));
+    logoDark->setStyleClass("sidebar-logo-img sidebar-logo-dark");
+    logoDark->setAlternateText("Imagery Solutions");
 
     // Business name (configurable via Settings)
     brandNameText_ = brand->addWidget(std::make_unique<Wt::WText>());
@@ -383,8 +381,10 @@ void App::showSettingsDialog()
 
     // Logo hint
     content->addWidget(ppc::xhtml(
-        "<div class=\"settings-hint\">To change the logo, place a <strong>logo.png</strong> file "
-        "in the application's resources directory.</div>"
+        "<div class=\"settings-hint\">To change the logo, replace "
+        "<strong>ImageryBusinessLogo.png</strong> (light) and "
+        "<strong>ImageryBusinessLogo_white.png</strong> (dark) "
+        "in the resources/images directory.</div>"
     ));
 
     // Footer buttons
