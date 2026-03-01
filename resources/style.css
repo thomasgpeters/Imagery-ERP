@@ -778,6 +778,8 @@ body > div,
 }
 .input-sm   { min-width: 80px; max-width: 100px; }
 .input-wide { min-width: 280px; flex: 1; }
+.input-wide-xl { min-width: 560px; flex: 1; }
+.input-wide-lg { min-width: 532px; flex: 1; }
 .input-textarea {
     width: 100%;
     padding: 10px 14px;
