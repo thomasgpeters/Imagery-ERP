@@ -780,9 +780,8 @@ body > div,
 .input-wide { min-width: 280px; flex: 1; }
 .input-wide-xl { width: 560px; max-width: 560px; }
 .input-wide-lg { width: 532px; max-width: 532px; }
-/* Prevent table cells from expanding beyond their input field */
-td:has(.input-wide-xl),
-td:has(.input-wide-lg) { width: 1px; white-space: nowrap; }
+/* Shrink-wrap table cell to its input content */
+.cell-shrink { width: 1px; white-space: nowrap; }
 .input-textarea {
     width: 100%;
     padding: 10px 14px;

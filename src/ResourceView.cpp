@@ -62,6 +62,7 @@ void ResourceView::refresh()
         double sellRate = role.fullyLoadedRate() * (1.0 + data_.markupPct / 100.0);
 
         // Editable name
+        table->elementAt(row, 0)->setStyleClass("cell-shrink");
         auto nameEdit = table->elementAt(row, 0)->addWidget(std::make_unique<Wt::WLineEdit>(role.name));
         nameEdit->setStyleClass("input-field input-wide-xl");
         int roleIdx = r;
