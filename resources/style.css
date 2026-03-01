@@ -496,20 +496,20 @@ body > div,
 /* Both classes land on the same element, so use combined selector (no space) */
 .settings-dialog.Wt-dialog {
     border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border: 0.25px solid #d1d5db;
     box-shadow: var(--shadow-lg);
-    background: var(--bg-card) !important;
+    background: #ffffff !important;
     color: var(--text-primary);
     overflow: hidden;
 }
 /* Wt wraps content in a .body div inside the dialog */
 .settings-dialog.Wt-dialog .body {
-    background: var(--bg-card);
+    background: #ffffff;
 }
 .settings-dialog.Wt-dialog .titlebar {
-    background: var(--bg-tertiary);
+    background: #ffffff;
     color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 0.25px solid #d1d5db;
     padding: 12px 20px;
     font-weight: 600;
     border-radius: 12px 12px 0 0;
@@ -520,7 +520,7 @@ body > div,
 }
 .settings-content {
     padding: 20px 24px;
-    background: var(--bg-card);
+    background: #ffffff;
 }
 .settings-section-title {
     font-size: 13px;
@@ -553,8 +553,8 @@ body > div,
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 24px 16px;
-    border-top: 1px solid var(--border-color);
-    background: var(--bg-card);
+    border-top: 0.25px solid #d1d5db;
+    background: #ffffff;
 }
 
 /* ---- About Dialog -------------------------------------------------------- */
@@ -574,13 +574,23 @@ body > div,
     float: right;
     cursor: pointer;
     font-size: 20px;
+    font-weight: 300;
     line-height: 1;
     color: #94a3b8;
-    padding: 0 4px;
-    margin-right: 4px;
+    padding: 4px 8px;
+    margin: -4px -4px -4px 0;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    user-select: none;
 }
 .about-close-x:hover {
     color: #1e293b;
+    background: #f1f5f9;
+}
+.about-close-x:active {
+    color: #0f172a;
+    background: #e2e8f0;
+    transform: scale(0.92);
 }
 .about-content {
     padding: 32px 32px 24px;
