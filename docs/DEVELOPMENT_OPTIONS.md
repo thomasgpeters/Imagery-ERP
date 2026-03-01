@@ -14,8 +14,9 @@ This document captures the architectural decisions, library evaluations, design 
 6. [Theming & UI Design](#6-theming--ui-design)
 7. [Data Model Design Decisions](#7-data-model-design-decisions)
 8. [Business Logic Placement](#8-business-logic-placement)
-9. [Security Considerations](#9-security-considerations)
-10. [Future Considerations](#10-future-considerations)
+9. [Formatting & Display Utilities](#9-formatting--display-utilities)
+10. [Security Considerations](#10-security-considerations)
+11. [Future Considerations](#11-future-considerations)
 
 ---
 
@@ -97,7 +98,7 @@ WApplication (App)
 │   └── app-body (WContainerWidget — flex row)
 │       ├── app-sidebar (WContainerWidget)
 │       │   ├── sidebar-header (project + client)
-│       │   ├── sidebar-nav (7 nav buttons)
+│       │   ├── sidebar-nav (8 nav buttons)
 │       │   └── sidebar-footer (version)
 │       └── app-workarea (WContainerWidget)
 │           ├── DashboardView (hidden/shown)
@@ -106,10 +107,11 @@ WApplication (App)
 │           ├── SprintView
 │           ├── CostingView
 │           ├── QuoteView
-│           └── ChangeOrderView
+│           ├── ChangeOrderView
+│           └── MaterialView
 ```
 
-**Navigation:** All 7 views are instantiated at startup and hidden. `showView(index)` hides all and shows the selected one, avoiding re-creation overhead. Each view has a `refresh()` method called when it becomes visible, which clears and rebuilds its content from the current data state.
+**Navigation:** All 8 views are instantiated at startup and hidden. `showView(index)` hides all and shows the selected one, avoiding re-creation overhead. Each view has a `refresh()` method called when it becomes visible, which clears and rebuilds its content from the current data state.
 
 ### Key Wt Features Used
 
@@ -120,7 +122,8 @@ WApplication (App)
 | `WDoubleSpinBox` / `WSpinBox` | Numeric inputs for rates, hours, weeks |
 | `WLineEdit` | Text inputs (names, emails) |
 | `WTextArea` | Multi-line text (SoW, descriptions, terms) |
-| `WComboBox` | Dropdown selectors (roles, phases) |
+| `WComboBox` | Dropdown selectors (roles, phases, categories) |
+| `WDateEdit` | Calendar date pickers (estimate valid-until, change order request date) |
 | `WPushButton` | Actions (add, delete, approve, sign) |
 | `WText` with XHTML | Rich content (badges, metrics, formatted labels) |
 | `WMessageBox` | Modal dialogs (PDF export, email confirmation) |
@@ -179,8 +182,8 @@ Rule.constraint(validate=Role, as_condition=lambda row: row.base_rate >= 0, erro
 
 **Why PostgreSQL:**
 - **Robust relational model** — The project planning domain is inherently relational (roles have rates, components have resources, sprints have components, estimates have components, etc.)
-- **Computed views** — SQL views (`v_project_summary`, `v_phase_cost`, etc.) push computation to the database where it's most efficient
-- **Stored functions** — `generate_sprints()`, `recalculate_estimate()`, etc. encapsulate complex operations close to the data
+- **Computed views** — 10 SQL views (`v_project_summary`, `v_component_cost`, `v_material_summary`, `v_phase_cost`, etc.) push computation to the database where it's most efficient
+- **Stored functions** — 5 functions (`generate_sprints()`, `recalculate_estimate()`, etc.) encapsulate complex operations close to the data
 - **JSONB support** — The `audit_log.old_values` / `new_values` columns use JSONB for flexible change tracking
 - **Extensions** — `uuid-ossp` for UUID generation, `pgcrypto` for secure hashing
 - **ApiLogicServer compatibility** — ApiLogicServer's SQLAlchemy integration works best with PostgreSQL
@@ -200,8 +203,8 @@ All tables live in the `ppc` schema (not `public`) to keep the namespace clean a
 
 **Naming Conventions:**
 - Tables: `snake_case` singular (`role`, `component`, `sprint`)
-- Junction tables: `parent_child` (`sprint_component`, `component_resource`, `estimate_component`)
-- Views: `v_` prefix (`v_project_summary`, `v_role_rates`)
+- Junction tables: `parent_child` (`sprint_component`, `component_resource`, `component_material`, `estimate_component`)
+- Views: `v_` prefix (`v_project_summary`, `v_role_rates`, `v_material_summary`)
 - Functions: descriptive verbs (`generate_sprints`, `recalculate_estimate`)
 
 **Fully Loaded Rate Pattern:**
@@ -333,6 +336,29 @@ Component: "Authentication Module"
 
 This enables per-component costing (`SUM(hours * role.fully_loaded_rate)`) and roll-up to project totals.
 
+### Component-Material Pattern
+
+**Decision:** `ComponentMaterial` junction linking components to materials with quantity.
+
+Each component can optionally include non-labor costs:
+```
+Component: "Cloud Infrastructure Setup"
+├── Resources (labor):
+│   ├── DevOps Engineer: 80 hrs
+│   └── Architect: 16 hrs
+└── Materials (non-labor):
+    ├── Cloud Hosting: 3 months × $2,500 = $7,500
+    ├── CI/CD Pipeline: 3 months × $300 = $900
+    └── SSL Certificates: 2 units × $200 = $400
+```
+
+Materials are defined in a project-level catalogue (`ProjectData::materials`) and referenced by components. The cost hierarchy:
+- `componentLaborCost()` — `SUM(hours × role.fullyLoadedRate)`
+- `componentMaterialCost()` — `SUM(quantity × material.unitCost)`
+- `componentCost()` — `componentLaborCost() + componentMaterialCost()`
+
+Material categories: Office Supplies, Construction, Equipment/Tools, Travel, Software/Licenses, Other. Each material has a unit type (unit, ton, bag, day, mile, license, lot, month, trip) and unit cost.
+
 ### Phase-Based vs. Sprint-Based Week Ranges
 
 **Decision:** Phases define week ranges; sprints are generated from project settings.
@@ -354,11 +380,12 @@ When a component's hours change, all estimates that include it automatically ref
 ### Current: In-Memory (DataModels.h)
 
 For the initial build, all business logic lives in `DataModels.h`:
-- Cost calculations (`componentCost()`, `getRoleTotalCost()`, etc.)
+- Cost calculations (`componentCost()`, `componentLaborCost()`, `componentMaterialCost()`, `getRoleTotalCost()`, `getTotalMaterialCost()`, etc.)
 - Blended rate computations (`getBlendedCostRate()`, `getBlendedSellRate()`)
 - Phase cost aggregation (`getPhaseHours()`, `getPhaseCost()`)
 - Sprint generation (`generateSprints()`)
 - Estimate recalculation (`recalcEstimate()`)
+- Formatting utilities (`formatCurrency()`, `formatDate()`, `formatTimestamp()`, `formatNumber()`, `formatPercent()`)
 
 ### Target: Three-Level Logic
 
@@ -372,7 +399,47 @@ The goal is to push validation and derived values down to the database and API l
 
 ---
 
-## 9. Security Considerations
+## 9. Formatting & Display Utilities
+
+### Decision: Custom Formatting Without Locale Dependencies
+
+**Choice:** Hand-rolled formatting functions in `DataModels.h` rather than `std::locale` or ICU.
+
+**Why:**
+- `std::locale` behavior varies across platforms (macOS vs. Linux, different C library implementations)
+- ICU would add a heavy dependency for simple formatting needs
+- The formatting is straightforward enough that custom code is reliable and portable
+
+### Currency Formatting (`formatCurrency`)
+
+Uses integer arithmetic for exact cent handling:
+```cpp
+long long cents = static_cast<long long>(v * 100.0 + 0.5);
+```
+Builds the thousands-grouped string right-to-left, inserting commas every 3 digits. Output: `$12,345.67`, `$0.00`, `-$1,500.00`.
+
+### Number Formatting (`formatNumber`)
+
+When `precision=0`, applies the same comma grouping (e.g., `1,240` hours). When `precision>0`, uses `std::fixed` with `std::setprecision`.
+
+### Date Formatting (`formatDate`, `formatTimestamp`)
+
+Parses ISO date strings (`"2026-03-01"`) via simple `std::stoi` + substring extraction. Maps month numbers to abbreviations (`"Jan"` through `"Dec"`). Try/catch fallback returns the raw string on parse failure.
+
+- `formatDate("2026-03-01")` → `"Mar 1, 2026"`
+- `formatTimestamp("2026-03-01 14:30:05")` → `"Mar 1, 2026 at 2:30 PM"` (12-hour clock)
+
+### Date Picker Integration (`WDateEdit`)
+
+Wt's `WDateEdit` provides a calendar popup with the format string `"MMM d, yyyy"`. Used for:
+- Estimate "Valid Until" date (default: 30 days from today via `dateOffsetDays(30)`)
+- Change Order "Request Date" (default: today)
+
+CSS styling for `.Wt-datepicker` provides hover states, selected-day highlight, and consistent border/shadow treatment.
+
+---
+
+## 10. Security Considerations
 
 ### Current State
 
@@ -392,7 +459,7 @@ The goal is to push validation and derived values down to the database and API l
 
 ---
 
-## 10. Future Considerations
+## 11. Future Considerations
 
 ### Near-Term
 

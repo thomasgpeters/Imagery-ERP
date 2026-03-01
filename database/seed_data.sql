@@ -290,7 +290,75 @@ INSERT INTO component_resource (component_id, role_id, estimated_hours, notes) V
 (15, 6,  8, 'User guide screenshots, visual aids');
 
 -- =============================================================================
--- 10. SPRINTS  (6 sprints x 2 weeks = 12 weeks)
+-- 10. MATERIALS  (non-labor cost items)
+-- =============================================================================
+INSERT INTO material (id, company_id, name, description, category, unit, unit_cost, sort_order) VALUES
+(1, 1, 'Cloud Hosting (Monthly)',
+    'AWS/Azure compute & storage for dev/staging environments',
+    'Software/Licenses', 'month', 2400.00, 1),
+(2, 1, 'CI/CD Pipeline Licenses',
+    'GitHub Actions / Jenkins enterprise license fees',
+    'Software/Licenses', 'month', 350.00, 2),
+(3, 1, 'SSL Certificates',
+    'Wildcard SSL certs for staging and production',
+    'Software/Licenses', 'unit', 250.00, 3),
+(4, 1, 'Monitoring & APM Tools',
+    'Datadog / New Relic APM license for project duration',
+    'Software/Licenses', 'month', 450.00, 4),
+(5, 1, 'UX Research Incentives',
+    'Gift cards / compensation for usability test participants',
+    'Other', 'unit', 50.00, 5),
+(6, 1, 'Team Travel — On-site Kick-off',
+    'Round-trip airfare + hotel for 3-day on-site workshop',
+    'Travel', 'trip', 1800.00, 6),
+(7, 1, 'Printing & Documentation',
+    'Bound project deliverables, training manuals',
+    'Office Supplies', 'lot', 180.00, 7),
+(8, 1, 'Security Pen-Test Service',
+    'Third-party penetration testing engagement',
+    'Other', 'unit', 4500.00, 8),
+(9, 1, 'Load Testing Platform',
+    'Blazemeter / k6 cloud for performance testing',
+    'Software/Licenses', 'month', 600.00, 9);
+
+SELECT setval('material_id_seq', 9);
+
+-- =============================================================================
+-- 11. COMPONENT MATERIALS  (material requirements per component)
+-- =============================================================================
+INSERT INTO component_material (component_id, material_id, quantity, notes) VALUES
+
+-- Component 1: Stakeholder Interviews
+(1, 6, 2, 'Kick-off + mid-project on-site visits'),
+(1, 7, 1, 'Printed interview guides'),
+
+-- Component 4: UX Research & Wireframes
+(4, 5, 15, 'Incentives for 15 usability test participants'),
+
+-- Component 5: System Architecture Design
+(5, 1, 3, 'Dev/staging cloud hosting during design phase'),
+(5, 2, 3, 'CI/CD pipeline setup'),
+
+-- Component 7: Auth & Authorization Module
+(7, 3, 2, 'Wildcard SSL certs for staging + prod'),
+(7, 1, 3, 'Cloud hosting during development'),
+
+-- Component 10: API Gateway & Integration Layer
+(10, 4, 4, 'APM monitoring during integration testing'),
+
+-- Component 13: Performance & Security Testing
+(13, 8, 1, 'Third-party pen test engagement'),
+(13, 9, 2, 'Load testing cloud platform'),
+
+-- Component 14: Production Deployment & Migration
+(14, 1, 3, 'Production cloud hosting setup'),
+(14, 4, 3, 'Monitoring + APM for production'),
+
+-- Component 15: Training & Documentation
+(15, 7, 3, 'Printed training manuals and handoff binders');
+
+-- =============================================================================
+-- 12. SPRINTS  (6 sprints x 2 weeks = 12 weeks)
 -- =============================================================================
 INSERT INTO sprint (id, project_id, sprint_number, name, goal, start_week, end_week, status) VALUES
 (1, 1, 1, 'Sprint 1 — Discovery',
@@ -315,7 +383,7 @@ INSERT INTO sprint (id, project_id, sprint_number, name, goal, start_week, end_w
 SELECT setval('sprint_id_seq', 6);
 
 -- =============================================================================
--- 11. SPRINT COMPONENTS  (assign components to sprints)
+-- 13. SPRINT COMPONENTS  (assign components to sprints)
 -- =============================================================================
 INSERT INTO sprint_component (sprint_id, component_id, story_points, priority, status) VALUES
 -- Sprint 1: Discovery
@@ -346,7 +414,7 @@ INSERT INTO sprint_component (sprint_id, component_id, story_points, priority, s
 (6, 15, 8,  2, 'To Do');  -- Training & Documentation
 
 -- =============================================================================
--- 12. SPRINT CEREMONIES  (all ceremonies for all sprints)
+-- 14. SPRINT CEREMONIES  (all ceremonies for all sprints)
 -- =============================================================================
 INSERT INTO sprint_ceremony (sprint_id, ceremony_id, status) VALUES
 -- Sprint 1
@@ -363,7 +431,7 @@ INSERT INTO sprint_ceremony (sprint_id, ceremony_id, status) VALUES
 (6, 1, 'Scheduled'), (6, 2, 'Scheduled'), (6, 3, 'Scheduled'), (6, 4, 'Scheduled'), (6, 5, 'Scheduled');
 
 -- =============================================================================
--- 13. WEEK ALLOCATIONS  (hours per role per week — the planning grid)
+-- 15. WEEK ALLOCATIONS  (hours per role per week — the planning grid)
 --     Matches spreadsheet layout: Roles × 12 Weeks
 -- =============================================================================
 
@@ -416,7 +484,7 @@ INSERT INTO week_allocation (project_id, role_id, week_number, allocated_hours) 
 (1, 8, 9,   0), (1, 8, 10,  0), (1, 8, 11, 20), (1, 8, 12, 20);
 
 -- =============================================================================
--- 14. SAMPLE ESTIMATE
+-- 16. SAMPLE ESTIMATE
 -- =============================================================================
 INSERT INTO estimate (id, project_id, estimate_number, name, description,
                       client_name, client_email, client_company,
@@ -439,7 +507,7 @@ INSERT INTO estimate_component (estimate_id, component_id, included, sort_order)
 SELECT 1, id, TRUE, sort_order FROM component WHERE project_id = 1 ORDER BY sort_order;
 
 -- =============================================================================
--- 15. SAMPLE CHANGE ORDER
+-- 17. SAMPLE CHANGE ORDER
 -- =============================================================================
 INSERT INTO change_order (id, project_id, estimate_id, change_order_number,
                           title, description, reason, impact_summary,
@@ -489,3 +557,14 @@ INSERT INTO change_order_item (change_order_id, action, description, role_id, ho
 -- SELECT '--- Ceremony Hours Per Sprint ---';
 -- SELECT sprint_number, SUM(total_ceremony_hours) AS total_ceremony_hours_per_sprint
 -- FROM v_sprint_ceremony_hours GROUP BY sprint_number ORDER BY sprint_number;
+
+-- SELECT '--- Material Summary ---';
+-- SELECT * FROM v_material_summary ORDER BY sort_order;
+
+-- SELECT '--- Component Costs (with Materials) ---';
+-- SELECT component_name, total_hours, labor_cost, material_cost, total_cost
+-- FROM v_component_cost ORDER BY component_id;
+
+-- SELECT '--- Project Summary (with Materials) ---';
+-- SELECT project_name, total_hours, labor_cost, material_cost, total_cost, total_sell
+-- FROM v_project_summary;
