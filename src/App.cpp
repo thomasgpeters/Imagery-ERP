@@ -421,6 +421,11 @@ void App::showAboutDialog()
     dialog->rejectWhenEscapePressed(true);
     dialog->setWidth(Wt::WLength(480));
 
+    // Close X button in titlebar
+    auto closeX = dialog->titleBar()->addWidget(std::make_unique<Wt::WText>("&times;"));
+    closeX->setStyleClass("about-close-x");
+    closeX->clicked().connect(dialog, &Wt::WDialog::accept);
+
     auto content = dialog->contents();
     content->setStyleClass("about-content");
 
@@ -456,6 +461,17 @@ void App::showAboutDialog()
     closeBtn->clicked().connect(dialog, &Wt::WDialog::accept);
 
     dialog->show();
+
+    // Close dialog when clicking on the backdrop overlay
+    doJavaScript(
+        "setTimeout(function(){"
+        "  var covers = document.querySelectorAll('.Wt-dialogcover');"
+        "  var cover = covers[covers.length - 1];"
+        "  if(cover) cover.addEventListener('click', function(){"
+        "    " + closeBtn->jsRef() + ".click();"
+        "  });"
+        "}, 0);"
+    );
 }
 
 void App::toggleTheme()
