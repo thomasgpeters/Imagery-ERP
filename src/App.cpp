@@ -82,13 +82,12 @@ void App::buildTopbar()
     // Left: Brand
     auto brand = topbar_->addWidget(std::make_unique<Wt::WContainerWidget>());
     brand->setStyleClass("topbar-brand");
-    auto brandText = brand->addWidget(std::make_unique<Wt::WText>(
+    brand->addWidget(ppc::xhtml(
         "<span class=\"brand-icon\">&#9672;</span>"
         "<span class=\"brand-name\">Imagery Solutions</span>"
         "<span class=\"brand-divider\">|</span>"
         "<span class=\"brand-app\">Project Planner</span>"
     ));
-    brandText->setTextFormat(Wt::TextFormat::XHTML);
 
     // Right: Theme toggle + User profile
     auto rightSection = topbar_->addWidget(std::make_unique<Wt::WContainerWidget>());
@@ -102,20 +101,18 @@ void App::buildTopbar()
     themeToggle_->clicked().connect(this, &App::toggleTheme);
 
     // Separator
-    auto sepText = rightSection->addWidget(std::make_unique<Wt::WText>(
+    rightSection->addWidget(ppc::xhtml(
         "<span class=\"topbar-sep\">|</span>"
     ));
-    sepText->setTextFormat(Wt::TextFormat::XHTML);
 
     // User profile
     auto userBtn = rightSection->addWidget(std::make_unique<Wt::WContainerWidget>());
     userBtn->setStyleClass("topbar-user");
-    auto userText = userBtn->addWidget(std::make_unique<Wt::WText>(
+    userBtn->addWidget(ppc::xhtml(
         "<span class=\"user-avatar\">SC</span>"
         "<span class=\"user-name\">Sarah Chen</span>"
         "<span class=\"user-role\">Project Manager</span>"
     ));
-    userText->setTextFormat(Wt::TextFormat::XHTML);
 }
 
 void App::buildSidebar()
@@ -125,12 +122,11 @@ void App::buildSidebar()
     // Sidebar header
     auto header = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
     header->setStyleClass("sidebar-header");
-    auto headerText = header->addWidget(std::make_unique<Wt::WText>(
+    header->addWidget(ppc::xhtml(
         "<div class=\"sidebar-project-label\">PROJECT</div>"
         "<div class=\"sidebar-project-name\">" + data_.projectName + "</div>"
         "<div class=\"sidebar-client\">" + data_.clientName + "</div>"
     ));
-    headerText->setTextFormat(Wt::TextFormat::XHTML);
 
     // Navigation items
     struct NavItem { std::string icon; std::string label; };
@@ -163,10 +159,9 @@ void App::buildSidebar()
     // Sidebar footer
     auto footer = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
     footer->setStyleClass("sidebar-footer");
-    auto footerText = footer->addWidget(std::make_unique<Wt::WText>(
+    footer->addWidget(ppc::xhtml(
         "<div class=\"sidebar-version\">v1.0.0</div>"
     ));
-    footerText->setTextFormat(Wt::TextFormat::XHTML);
 }
 
 void App::showView(int index)
