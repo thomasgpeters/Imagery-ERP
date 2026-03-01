@@ -508,11 +508,18 @@ body > div,
 }
 .settings-dialog.Wt-dialog .titlebar {
     background: #ffffff;
-    color: var(--text-primary);
+    color: #0f172a;
     border-bottom: 0.25px solid #d1d5db;
     padding: 12px 20px;
     font-weight: 600;
     border-radius: 12px 12px 0 0;
+}
+.settings-title-gear {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 16px;
+    color: #64748b;
+    vertical-align: middle;
 }
 /* Modal backdrop */
 .Wt-dialogcover {
@@ -525,7 +532,7 @@ body > div,
 .settings-section-title {
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-bottom: 12px;
@@ -536,17 +543,17 @@ body > div,
 .settings-field .field-label {
     display: block;
     margin-bottom: 4px;
-    color: var(--text-primary);
+    color: #0f172a;
 }
 .settings-hint {
     font-size: 12px;
-    color: var(--text-muted);
+    color: #94a3b8;
     line-height: 1.5;
     margin-top: 8px;
     padding: 10px 14px;
-    background: var(--bg-tertiary);
+    background: #f1f5f9;
     border-radius: 6px;
-    border: 1px solid var(--border-color);
+    border: 1px solid #e2e8f0;
 }
 .settings-footer {
     display: flex;
@@ -555,6 +562,24 @@ body > div,
     padding: 12px 24px 16px;
     border-top: 0.25px solid #d1d5db;
     background: #ffffff;
+}
+/* Dialog buttons need hardcoded colors — dialogs live outside the
+   .theme-light/.theme-dark container, so CSS variables don't resolve. */
+.settings-footer .btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+.settings-footer .btn-primary:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+}
+.settings-footer .btn-secondary {
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+.settings-footer .btn-secondary:hover {
+    background: #e2e8f0;
 }
 
 /* ---- About Dialog -------------------------------------------------------- */
@@ -631,6 +656,13 @@ body > div,
 .about-footer {
     background: #ffffff !important;
     border-top: 0.25px solid #d1d5db !important;
+}
+.about-footer .btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+.about-footer .btn-primary:hover {
+    background: #1d4ed8;
 }
 
 /* ---- Work Area ----------------------------------------------------------- */
