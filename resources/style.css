@@ -570,6 +570,18 @@ body > div,
     color: #1e293b;
     border-bottom: 0.25px solid #d1d5db;
 }
+.about-close-x {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    color: #94a3b8;
+    padding: 0 4px;
+    margin-right: 4px;
+}
+.about-close-x:hover {
+    color: #1e293b;
+}
 .about-content {
     padding: 32px 32px 24px;
     text-align: center;
