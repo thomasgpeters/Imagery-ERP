@@ -364,6 +364,11 @@ void App::showSettingsDialog()
     dialog->rejectWhenEscapePressed(true);
     dialog->setWidth(Wt::WLength(420));
 
+    // Add gear icon before the title text in the titlebar
+    auto gearIcon = std::make_unique<Wt::WText>("&#9881;", Wt::TextFormat::XHTML);
+    gearIcon->setStyleClass("settings-title-gear");
+    dialog->titleBar()->insertWidget(0, std::move(gearIcon));
+
     auto content = dialog->contents();
     content->setStyleClass("settings-content");
 
