@@ -174,14 +174,22 @@ void SprintView::refresh()
                         auto compItem = compList->addWidget(std::make_unique<Wt::WContainerWidget>());
                         compItem->setStyleClass("sprint-comp-item-wrap");
 
-                        compItem->addWidget(ppc::xhtml(
-                            "<div class=\"sprint-comp-row\">"
-                            "<span class=\"comp-name\">" + comp.name + "</span>"
-                            "<span class=\"comp-hours\">" + ppc::formatNumber(hrs, 0) + " hrs</span>"
-                            "<span class=\"comp-cost\">" + ppc::formatCurrency(cost) + "</span>"
-                            "</div>"
-                        ));
+                        // Header row: name | hours | cost — built with widgets to avoid XHTML escaping issues
+                        auto row = compItem->addWidget(std::make_unique<Wt::WContainerWidget>());
+                        row->setStyleClass("sprint-comp-row");
 
+                        auto nameW = row->addWidget(std::make_unique<Wt::WText>(comp.name, Wt::TextFormat::Plain));
+                        nameW->setStyleClass("comp-name");
+
+                        auto hrsW = row->addWidget(std::make_unique<Wt::WText>(
+                            ppc::formatNumber(hrs, 0) + " hrs", Wt::TextFormat::Plain));
+                        hrsW->setStyleClass("comp-hours");
+
+                        auto costW = row->addWidget(std::make_unique<Wt::WText>(
+                            ppc::formatCurrency(cost), Wt::TextFormat::Plain));
+                        costW->setStyleClass("comp-cost");
+
+                        // SoW text
                         if (!comp.statementOfWork.empty()) {
                             auto sowText = compItem->addWidget(
                                 std::make_unique<Wt::WText>(comp.statementOfWork, Wt::TextFormat::Plain));
