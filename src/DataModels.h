@@ -143,10 +143,18 @@ inline std::string dateOffsetDays(int days) {
 struct Company {
     int id = 0;
     std::string name;
+    std::string legalName;
     std::string logoUrl;
     std::string website;
+    std::string addressLine1;
+    std::string addressLine2;
+    std::string city;
+    std::string stateProvince;
+    std::string postalCode;
+    std::string country = "US";
     std::string phone;
     std::string email;
+    std::string taxId;
     double defaultMarkupPct = 30.0;
     int defaultSprintWeeks = 2;
 };
@@ -164,10 +172,12 @@ struct Role {
 
 struct Resource {
     int id = 0;
+    int companyId = 0;
     int roleId = 0;
     std::string firstName;
     std::string lastName;
     std::string email;
+    std::string phone;
     double rateOverride = -1.0; // negative = use role default
     double availabilityPct = 100.0;
     bool isActive = true;
@@ -248,16 +258,23 @@ struct Sprint {
     std::string goal;
     int startWeek = 1;
     int endWeek = 2;
+    std::string startDate;
+    std::string endDate;
     std::string status = "Planned";
+    double velocityPlanned = 0.0;
+    double velocityActual = 0.0;
     std::vector<int> componentIds;
 };
 
 struct WeekAllocation {
+    int id = 0;
     int projectId = 0;
     int roleId = 0;
+    int resourceId = 0;
     int weekNumber = 1;
     double allocatedHours = 0.0;
     double actualHours = -1.0; // negative = not yet reported
+    std::string notes;
 };
 
 struct ESignature {
@@ -269,6 +286,8 @@ struct ESignature {
     std::string signerCompany;
     std::string signatureData; // typed name or base64 drawn
     std::string signatureType = "typed";
+    std::string ipAddress;
+    std::string userAgent;
     std::string signedAt;
     bool isValid = true;
 };
@@ -286,23 +305,31 @@ struct Estimate {
     double totalHours = 0.0;
     double totalCost = 0.0;
     double totalSell = 0.0;
+    double marginAmount = 0.0;
+    double blendedCostRate = 0.0;
+    double blendedSellRate = 0.0;
     int version = 1;
     std::string status = "Draft";
     std::string validUntil;
     std::string termsAndConditions;
+    std::string notes;
     std::string sharedLinkToken;
+    int createdBy = 0;
     std::string createdAt;
     std::vector<int> componentIds;
     std::vector<ESignature> signatures;
 };
 
 struct ChangeOrderItem {
+    int id = 0;
+    int changeOrderId = 0;
     std::string action; // Add, Modify, Remove
     int componentId = 0;
     std::string description;
     int roleId = 0;
     double hoursDelta = 0.0;
     double costDelta = 0.0;
+    int sortOrder = 0;
 };
 
 struct ChangeOrder {
@@ -321,9 +348,12 @@ struct ChangeOrder {
     std::string status = "Draft";
     std::string requestedBy;
     std::string requestedDate;
+    int reviewedBy = 0;
+    std::string reviewedDate;
     std::string approvedBy;
     std::string approvedDate;
     int version = 1;
+    int createdBy = 0;
     std::vector<ChangeOrderItem> items;
     std::vector<ESignature> signatures;
 };
@@ -401,7 +431,7 @@ public:
                 return;
             }
         }
-        allocations.push_back({1, roleId, week, hrs, -1.0});
+        allocations.push_back({0, 1, roleId, 0, week, hrs, -1.0, ""});
     }
 
     double getRoleTotalHours(int roleId) const {
@@ -540,9 +570,15 @@ public:
     void loadSampleData() {
         company.id = 1;
         company.name = "Imagery Solutions";
+        company.legalName = "Imagery Solutions LLC";
         company.email = "info@imagerysolutions.com";
         company.phone = "(512) 555-0100";
         company.website = "https://imagerysolutions.com";
+        company.addressLine1 = "100 Innovation Drive";
+        company.city = "Austin";
+        company.stateProvince = "TX";
+        company.postalCode = "78701";
+        company.country = "US";
         company.defaultMarkupPct = 30.0;
         company.defaultSprintWeeks = 2;
 
@@ -563,6 +599,20 @@ public:
             {6, "UX Designer",        "UX/UI Designer",                65.00, 13.00, true, 6},
             {7, "DevOps Engineer",    "DevOps Engineer",               80.00, 16.00, true, 7},
             {8, "Business Analyst",   "Business Analyst",              50.00, 12.00, true, 8},
+        };
+
+        // Resources (individual people assigned to roles)
+        resources = {
+            {1,  1, 1, "Maria",  "Thompson", "maria.thompson@imagerysolutions.com", "", -1.0, 100.0, true},
+            {2,  1, 2, "David",  "Kim",      "david.kim@imagerysolutions.com",      "", -1.0, 100.0, true},
+            {3,  1, 3, "Alex",   "Patel",    "alex.patel@imagerysolutions.com",     "", -1.0, 100.0, true},
+            {4,  1, 4, "Lisa",   "Nguyen",   "lisa.nguyen@imagerysolutions.com",    "", -1.0, 100.0, true},
+            {5,  1, 5, "Sarah",  "Chen",     "sarah.chen@imagerysolutions.com",     "", -1.0, 100.0, true},
+            {6,  1, 6, "Jordan", "Rivera",   "jordan.rivera@imagerysolutions.com",  "", -1.0, 100.0, true},
+            {7,  1, 7, "Chris",  "Mueller",  "chris.mueller@imagerysolutions.com",  "", -1.0, 100.0, true},
+            {8,  1, 8, "Priya",  "Sharma",   "priya.sharma@imagerysolutions.com",  "", -1.0, 100.0, true},
+            {9,  1, 2, "Tyler",  "Brooks",   "tyler.brooks@imagerysolutions.com",  "", -1.0, 100.0, true},
+            {10, 1, 4, "Emma",   "Watson",   "emma.watson@imagerysolutions.com",   "", -1.0, 100.0, true},
         };
 
         // Materials
@@ -629,7 +679,7 @@ public:
         for (int r = 0; r < 8; r++) {
             for (int w = 0; w < 12; w++) {
                 if (allHrs[r][w] > 0) {
-                    allocations.push_back({1, roles[r].id, w + 1, (double)allHrs[r][w], -1.0});
+                    allocations.push_back({0, 1, roles[r].id, 0, w + 1, (double)allHrs[r][w], -1.0, ""});
                 }
             }
         }
@@ -720,16 +770,31 @@ public:
              {{26, 3, "Printed training manuals and handoff binders"}}},
         };
 
-        // Generate sprints
+        // Generate sprints with named goals matching seed data
         generateSprints();
-
-        // Assign components to sprints
         if (sprints.size() >= 6) {
+            sprints[0].name = "Sprint 1 \xe2\x80\x94 Discovery";
+            sprints[0].goal = "Complete stakeholder interviews, begin current-state assessment, establish project foundations.";
             sprints[0].componentIds = {1, 2, 3};
+
+            sprints[1].name = "Sprint 2 \xe2\x80\x94 Design";
+            sprints[1].goal = "Complete architecture design, UX wireframes, and requirements documentation.";
             sprints[1].componentIds = {4, 5, 6};
+
+            sprints[2].name = "Sprint 3 \xe2\x80\x94 Core Dev I";
+            sprints[2].goal = "Implement authentication module and begin dashboard and API gateway development.";
             sprints[2].componentIds = {7, 8, 10};
+
+            sprints[3].name = "Sprint 4 \xe2\x80\x94 Core Dev II";
+            sprints[3].goal = "Complete dashboard, document management, and notification modules.";
             sprints[3].componentIds = {9, 11};
+
+            sprints[4].name = "Sprint 5 \xe2\x80\x94 Testing";
+            sprints[4].goal = "Execute integration, system, performance, and security testing. Resolve defects.";
             sprints[4].componentIds = {12, 13};
+
+            sprints[5].name = "Sprint 6 \xe2\x80\x94 Deploy & Transition";
+            sprints[5].goal = "Production deployment, data migration, user training, and project handoff.";
             sprints[5].componentIds = {14, 15};
         }
 
@@ -778,11 +843,11 @@ public:
         co.requestedBy = "Robert Blackwell";
         co.requestedDate = "2026-04-01";
         co.items = {
-            {"Add", 0, "Mobile wireframes and responsive design system tokens", 6, 32, 2496.00},
-            {"Add", 0, "Responsive CSS/JS for 5 primary views", 2, 40, 2880.00},
-            {"Add", 0, "Mobile-specific interactions and touch optimization", 3, 24, 2880.00},
-            {"Modify", 0, "Extended cross-device testing (mobile/tablet matrix)", 4, 24, 1200.00},
-            {"Modify", 0, "Update docs with mobile screenshots", 8, 0, 24.00},
+            {0, co.id, "Add",    0, "Mobile wireframes and responsive design system tokens", 6, 32, 2496.00, 1},
+            {0, co.id, "Add",    0, "Responsive CSS/JS for 5 primary views",                 2, 40, 2880.00, 2},
+            {0, co.id, "Add",    0, "Mobile-specific interactions and touch optimization",    3, 24, 2880.00, 3},
+            {0, co.id, "Modify", 0, "Extended cross-device testing (mobile/tablet matrix)",  4, 24, 1200.00, 4},
+            {0, co.id, "Modify", 0, "Update docs with mobile screenshots",                   8,  0,   24.00, 5},
         };
         changeOrders.push_back(co);
     }

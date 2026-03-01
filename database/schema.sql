@@ -213,6 +213,50 @@ CREATE INDEX idx_comp_resource_role      ON component_resource(role_id);
 COMMENT ON TABLE component_resource IS 'Resource requirements per component — hours needed per role';
 
 -- =============================================================================
+-- 8b. MATERIAL  (materials, expenses, and non-labor cost items)
+-- =============================================================================
+CREATE TABLE material (
+    id              SERIAL PRIMARY KEY,
+    company_id      INTEGER NOT NULL REFERENCES company(id) ON DELETE CASCADE,
+    name            VARCHAR(200) NOT NULL,
+    description     TEXT,
+    category        VARCHAR(50) DEFAULT 'Other'
+                        CHECK (category IN ('Office Supplies','Construction','Equipment/Tools',
+                                            'Travel','Software/Licenses','Other')),
+    unit            VARCHAR(30) DEFAULT 'unit',
+    unit_cost       NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    is_active       BOOLEAN DEFAULT TRUE,
+    sort_order      INTEGER DEFAULT 0,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_material_company ON material(company_id);
+
+COMMENT ON TABLE material IS 'Materials, equipment, travel, licenses, and other non-labor cost items';
+COMMENT ON COLUMN material.category IS 'Cost category: Office Supplies, Construction, Equipment/Tools, Travel, Software/Licenses, Other';
+COMMENT ON COLUMN material.unit IS 'Unit of measure: unit, month, trip, lot, license, etc.';
+
+-- =============================================================================
+-- 8c. COMPONENT_MATERIAL  (materials/expenses assigned to a component)
+-- =============================================================================
+CREATE TABLE component_material (
+    id              SERIAL PRIMARY KEY,
+    component_id    INTEGER NOT NULL REFERENCES component(id) ON DELETE CASCADE,
+    material_id     INTEGER NOT NULL REFERENCES material(id) ON DELETE RESTRICT,
+    quantity        NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    notes           TEXT,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(component_id, material_id)
+);
+
+CREATE INDEX idx_comp_material_component ON component_material(component_id);
+CREATE INDEX idx_comp_material_material  ON component_material(material_id);
+
+COMMENT ON TABLE component_material IS 'Materials and expenses assigned to a component with quantities';
+
+-- =============================================================================
 -- 9. AGILE CEREMONY DEFINITIONS
 -- =============================================================================
 CREATE TABLE agile_ceremony (
@@ -598,22 +642,37 @@ FROM role r;
 
 COMMENT ON VIEW v_role_rates IS 'Roles with computed fully loaded rate (base + overhead)';
 
--- Component cost summary view
+-- Component cost summary view (labor + materials)
 CREATE OR REPLACE VIEW v_component_cost AS
 SELECT
     c.id AS component_id,
     c.project_id,
     c.name AS component_name,
     c.phase_id,
-    COALESCE(SUM(cr.estimated_hours), 0) AS total_hours,
-    COALESCE(SUM(cr.estimated_hours * (r.base_rate + r.overhead_rate)), 0) AS total_cost,
-    COUNT(DISTINCT cr.role_id) AS role_count
+    COALESCE(labor.total_hours, 0) AS total_hours,
+    COALESCE(labor.labor_cost, 0) AS labor_cost,
+    COALESCE(mat.material_cost, 0) AS material_cost,
+    COALESCE(labor.labor_cost, 0) + COALESCE(mat.material_cost, 0) AS total_cost,
+    COALESCE(labor.role_count, 0) AS role_count
 FROM component c
-LEFT JOIN component_resource cr ON cr.component_id = c.id
-LEFT JOIN role r ON r.id = cr.role_id
-GROUP BY c.id, c.project_id, c.name, c.phase_id;
+LEFT JOIN (
+    SELECT cr.component_id,
+           SUM(cr.estimated_hours) AS total_hours,
+           SUM(cr.estimated_hours * (r.base_rate + r.overhead_rate)) AS labor_cost,
+           COUNT(DISTINCT cr.role_id) AS role_count
+    FROM component_resource cr
+    JOIN role r ON r.id = cr.role_id
+    GROUP BY cr.component_id
+) labor ON labor.component_id = c.id
+LEFT JOIN (
+    SELECT cm.component_id,
+           SUM(cm.quantity * m.unit_cost) AS material_cost
+    FROM component_material cm
+    JOIN material m ON m.id = cm.material_id
+    GROUP BY cm.component_id
+) mat ON mat.component_id = c.id;
 
-COMMENT ON VIEW v_component_cost IS 'Component-level cost summary with total hours and fully loaded cost';
+COMMENT ON VIEW v_component_cost IS 'Component-level cost summary with labor hours, labor cost, material cost, and total cost';
 
 -- Weekly cost grid view (the "Fully Loaded Costs" table)
 CREATE OR REPLACE VIEW v_weekly_cost_grid AS
@@ -891,6 +950,8 @@ CREATE TRIGGER trg_project_updated    BEFORE UPDATE ON project    FOR EACH ROW E
 CREATE TRIGGER trg_phase_updated      BEFORE UPDATE ON phase      FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_component_updated  BEFORE UPDATE ON component  FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_comp_res_updated   BEFORE UPDATE ON component_resource FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+CREATE TRIGGER trg_material_updated   BEFORE UPDATE ON material           FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+CREATE TRIGGER trg_comp_mat_updated   BEFORE UPDATE ON component_material FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_ceremony_updated   BEFORE UPDATE ON agile_ceremony     FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_sprint_updated     BEFORE UPDATE ON sprint     FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_week_alloc_updated BEFORE UPDATE ON week_allocation    FOR EACH ROW EXECUTE FUNCTION update_timestamp();

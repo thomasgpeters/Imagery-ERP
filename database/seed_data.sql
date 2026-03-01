@@ -290,6 +290,56 @@ INSERT INTO component_resource (component_id, role_id, estimated_hours, notes) V
 (15, 6,  8, 'User guide screenshots, visual aids');
 
 -- =============================================================================
+-- 9b. MATERIALS  (non-labor cost items)
+-- =============================================================================
+INSERT INTO material (id, company_id, name, description, category, unit, unit_cost, is_active, sort_order) VALUES
+(20, 1, 'Cloud Hosting (Monthly)',      'AWS/Azure compute & storage for dev/staging environments',           'Software/Licenses', 'month',   2400.00, TRUE, 1),
+(21, 1, 'CI/CD Pipeline Licenses',      'GitHub Actions / Jenkins enterprise license fees',                   'Software/Licenses', 'month',    350.00, TRUE, 2),
+(22, 1, 'SSL Certificates',             'Wildcard SSL certs for staging and production',                      'Software/Licenses', 'unit',     250.00, TRUE, 3),
+(23, 1, 'Monitoring & APM Tools',       'Datadog / New Relic APM license for project duration',               'Software/Licenses', 'month',    450.00, TRUE, 4),
+(24, 1, 'UX Research Incentives',       'Gift cards / compensation for usability test participants',          'Other',             'unit',      50.00, TRUE, 5),
+(25, 1, 'Team Travel — On-site Kick-off', 'Round-trip airfare + hotel for 3-day on-site workshop',           'Travel',            'trip',    1800.00, TRUE, 6),
+(26, 1, 'Printing & Documentation',     'Bound project deliverables, training manuals',                      'Office Supplies',   'lot',      180.00, TRUE, 7),
+(27, 1, 'Security Pen-Test Service',    'Third-party penetration testing engagement',                         'Other',             'unit',    4500.00, TRUE, 8),
+(28, 1, 'Load Testing Platform',        'Blazemeter / k6 cloud for performance testing',                     'Software/Licenses', 'month',    600.00, TRUE, 9);
+
+SELECT setval('material_id_seq', 28);
+
+-- =============================================================================
+-- 9c. COMPONENT MATERIALS  (materials/expenses per component)
+-- =============================================================================
+INSERT INTO component_material (component_id, material_id, quantity, notes) VALUES
+
+-- Component 1: Stakeholder Interviews
+(1, 25, 2, 'Kick-off + mid-project on-site visits'),
+(1, 26, 1, 'Printed interview guides'),
+
+-- Component 4: UX Research & Wireframes
+(4, 24, 15, 'Incentives for 15 usability test participants'),
+
+-- Component 5: System Architecture Design
+(5, 20, 3, 'Dev/staging cloud hosting during design phase'),
+(5, 21, 3, 'CI/CD pipeline setup'),
+
+-- Component 7: Authentication & Authorization Module
+(7, 22, 2, 'Wildcard SSL certs for staging + prod'),
+(7, 20, 3, 'Cloud hosting during development'),
+
+-- Component 10: API Gateway & Integration Layer
+(10, 23, 4, 'APM monitoring during integration testing'),
+
+-- Component 13: Performance & Security Testing
+(13, 27, 1, 'Third-party pen test engagement'),
+(13, 28, 2, 'Load testing cloud platform'),
+
+-- Component 14: Production Deployment & Migration
+(14, 20, 3, 'Production cloud hosting setup'),
+(14, 23, 3, 'Monitoring + APM for production'),
+
+-- Component 15: Training & Documentation
+(15, 26, 3, 'Printed training manuals and handoff binders');
+
+-- =============================================================================
 -- 10. SPRINTS  (6 sprints x 2 weeks = 12 weeks)
 -- =============================================================================
 INSERT INTO sprint (id, project_id, sprint_number, name, goal, start_week, end_week, status) VALUES
