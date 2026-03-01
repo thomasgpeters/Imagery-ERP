@@ -78,4 +78,5 @@ private:
     void setNavActive(int navIdx);
     void refreshView(int viewIndex);
     void showSettingsDialog();
+    void showAboutDialog();
 };
