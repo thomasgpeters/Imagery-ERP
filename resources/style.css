@@ -303,17 +303,27 @@ body > div,
 .user-dropdown li > span {
     display: block;
     padding: 8px 16px;
+    margin: 2px 6px;
+    border-radius: 5px;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary) !important;
     text-decoration: none !important;
     cursor: pointer;
-    transition: background 0.1s;
+    transition: all 0.12s ease;
 }
 .user-dropdown .Wt-popupmenu-item:hover,
 .user-dropdown li:hover > a,
 .user-dropdown li:hover > span {
     background: var(--bg-tertiary);
+    color: var(--accent-blue) !important;
+    padding-left: 20px;
+}
+.user-dropdown .Wt-popupmenu-item:active,
+.user-dropdown li:active > a,
+.user-dropdown li:active > span {
+    background: rgba(59, 130, 246, 0.12);
+    transform: scale(0.98);
 }
 .user-dropdown .dropdown-header,
 .user-dropdown .dropdown-header > a,
@@ -324,11 +334,17 @@ body > div,
     letter-spacing: 1.2px;
     text-transform: uppercase;
     padding: 10px 16px 4px !important;
+    margin: 0 6px !important;
     cursor: default !important;
     background: transparent !important;
 }
-.user-dropdown .dropdown-header:hover {
+.user-dropdown .dropdown-header:hover,
+.user-dropdown .dropdown-header:hover > a,
+.user-dropdown .dropdown-header:hover > span {
     background: transparent !important;
+    color: var(--text-muted) !important;
+    padding-left: 16px !important;
+    transform: none !important;
 }
 .user-dropdown .Wt-popupmenu-separator,
 .user-dropdown hr {
