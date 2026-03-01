@@ -119,14 +119,50 @@ void App::buildTopbar()
         "<span class=\"topbar-sep\">|</span>"
     ));
 
-    // User profile
-    auto userBtn = rightSection->addWidget(std::make_unique<Wt::WContainerWidget>());
-    userBtn->setStyleClass("topbar-user");
-    userBtn->addWidget(ppc::xhtml(
+    // User profile button — opens dropdown with role switcher
+    auto userBtn = rightSection->addWidget(std::make_unique<Wt::WPushButton>());
+    userBtn->setTextFormat(Wt::TextFormat::XHTML);
+    userBtn->setStyleClass("topbar-user-btn");
+
+    // Role badge shows active role next to the user info
+    userRoleBadge_ = rightSection->addWidget(std::make_unique<Wt::WText>());
+    userRoleBadge_->setTextFormat(Wt::TextFormat::XHTML);
+    userRoleBadge_->setText("<span class=\"role-badge planning\">Planning</span>");
+
+    // Build the user button content
+    userBtn->setText(
         "<span class=\"user-avatar\">SC</span>"
+        "<span class=\"user-info\">"
         "<span class=\"user-name\">Sarah Chen</span>"
         "<span class=\"user-role\">Project Manager</span>"
-    ));
+        "</span>"
+        "<span class=\"user-chevron\">&#9662;</span>"
+    );
+
+    // Create popup menu
+    auto popup = std::make_unique<Wt::WPopupMenu>();
+    popup->setStyleClass("user-dropdown");
+
+    // Header label (non-clickable)
+    auto headerItem = popup->addItem("SWITCH ROLE");
+    headerItem->setDisabled(true);
+    headerItem->setStyleClass("dropdown-header");
+
+    // Planning role option
+    auto planningItem = popup->addItem("Planning");
+    planningItem->triggered().connect([this]() { switchRole(AppRole::Planning); });
+
+    // Execution role option
+    auto executionItem = popup->addItem("Execution");
+    executionItem->triggered().connect([this]() { switchRole(AppRole::Execution); });
+
+    popup->addSeparator();
+
+    // Settings option
+    auto settingsItem = popup->addItem("Settings");
+    settingsItem->triggered().connect(this, &App::showSettingsDialog);
+
+    userBtn->setMenu(std::move(popup));
 }
 
 void App::buildSidebar()
@@ -169,25 +205,6 @@ void App::buildSidebar()
         "<div class=\"sidebar-project-name\">" + data_.projectName + "</div>"
         "<div class=\"sidebar-client\">" + data_.clientName + "</div>"
     ));
-
-    // ── Separator ──
-    sidebar_->addWidget(ppc::xhtml("<div class=\"sidebar-sep\"></div>"));
-
-    // ── Role switcher ──
-    auto roleSwitcher = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
-    roleSwitcher->setStyleClass("role-switcher");
-
-    planningRoleBtn_ = roleSwitcher->addWidget(std::make_unique<Wt::WPushButton>());
-    planningRoleBtn_->setTextFormat(Wt::TextFormat::XHTML);
-    planningRoleBtn_->setText("Planning");
-    planningRoleBtn_->setStyleClass("role-btn active");
-    planningRoleBtn_->clicked().connect([this]() { switchRole(AppRole::Planning); });
-
-    executionRoleBtn_ = roleSwitcher->addWidget(std::make_unique<Wt::WPushButton>());
-    executionRoleBtn_->setTextFormat(Wt::TextFormat::XHTML);
-    executionRoleBtn_->setText("Execution");
-    executionRoleBtn_->setStyleClass("role-btn");
-    executionRoleBtn_->clicked().connect([this]() { switchRole(AppRole::Execution); });
 
     // ── Separator ──
     sidebar_->addWidget(ppc::xhtml("<div class=\"sidebar-sep\"></div>"));
@@ -267,13 +284,11 @@ void App::switchRole(AppRole role)
     if (role == activeRole_) return;
     activeRole_ = role;
 
-    // Update role switcher button styles
+    // Update role badge in topbar
     if (role == AppRole::Planning) {
-        planningRoleBtn_->setStyleClass("role-btn active");
-        executionRoleBtn_->setStyleClass("role-btn");
+        userRoleBadge_->setText("<span class=\"role-badge planning\">Planning</span>");
     } else {
-        planningRoleBtn_->setStyleClass("role-btn");
-        executionRoleBtn_->setStyleClass("role-btn active");
+        userRoleBadge_->setText("<span class=\"role-badge execution\">Execution</span>");
     }
 
     // Rebuild navigation for new role

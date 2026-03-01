@@ -8,6 +8,7 @@
 #include <Wt/WTabWidget.h>
 #include <Wt/WText.h>
 #include <Wt/WPushButton.h>
+#include <Wt/WPopupMenu.h>
 #include "DataModels.h"
 
 class DashboardView;
@@ -40,8 +41,7 @@ private:
 
     // Role state
     AppRole activeRole_ = AppRole::Planning;
-    Wt::WPushButton* planningRoleBtn_ = nullptr;
-    Wt::WPushButton* executionRoleBtn_ = nullptr;
+    Wt::WText* userRoleBadge_ = nullptr;
 
     // Each nav button maps to a view index in the workarea
     std::vector<int> navViewMap_;
