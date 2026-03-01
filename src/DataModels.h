@@ -29,11 +29,44 @@ inline std::unique_ptr<Wt::WText> xhtml(const std::string& html) {
 // ---- Utility Formatters ----------------------------------------------------
 
 inline std::string formatCurrency(double v) {
+    bool negative = v < 0;
+    if (negative) v = -v;
+
+    // Format with 2 decimal places
+    long long cents = static_cast<long long>(v * 100.0 + 0.5);
+    long long whole = cents / 100;
+    long long frac  = cents % 100;
+
+    // Insert thousands-separator commas into the whole part
+    std::string digits = std::to_string(whole);
+    std::string grouped;
+    int count = 0;
+    for (int i = (int)digits.size() - 1; i >= 0; i--) {
+        if (count > 0 && count % 3 == 0) grouped = ',' + grouped;
+        grouped = digits[i] + grouped;
+        count++;
+    }
+
     std::ostringstream s;
-    s << "$" << std::fixed << std::setprecision(2) << v;
+    s << (negative ? "-$" : "$") << grouped << '.'
+      << std::setfill('0') << std::setw(2) << frac;
     return s.str();
 }
 inline std::string formatNumber(double v, int p = 1) {
+    if (p == 0) {
+        // Integer formatting with thousands-separator commas
+        bool negative = v < 0;
+        long long whole = static_cast<long long>(negative ? -v + 0.5 : v + 0.5);
+        std::string digits = std::to_string(whole);
+        std::string grouped;
+        int count = 0;
+        for (int i = (int)digits.size() - 1; i >= 0; i--) {
+            if (count > 0 && count % 3 == 0) grouped = ',' + grouped;
+            grouped = digits[i] + grouped;
+            count++;
+        }
+        return (negative ? "-" : "") + grouped;
+    }
     std::ostringstream s;
     s << std::fixed << std::setprecision(p) << v;
     return s.str();
@@ -43,16 +76,65 @@ inline std::string formatPercent(double v) {
     s << std::fixed << std::setprecision(1) << v << "%";
     return s.str();
 }
-inline std::string currentDate() {
+
+// ---- Date / Time Formatters ------------------------------------------------
+
+inline std::string currentDateISO() {
     std::time_t t = std::time(nullptr);
     char buf[32];
     std::strftime(buf, sizeof(buf), "%Y-%m-%d", std::localtime(&t));
     return buf;
 }
-inline std::string currentTimestamp() {
+inline std::string currentDate() { return currentDateISO(); }
+
+inline std::string currentTimestampISO() {
     std::time_t t = std::time(nullptr);
     char buf[64];
     std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&t));
+    return buf;
+}
+inline std::string currentTimestamp() { return currentTimestampISO(); }
+
+// Format "2026-03-01" → "Mar 1, 2026"
+inline std::string formatDate(const std::string& isoDate) {
+    if (isoDate.size() < 10) return isoDate;
+    static const char* months[] = {
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    };
+    int y = 0, m = 0, d = 0;
+    try {
+        y = std::stoi(isoDate.substr(0, 4));
+        m = std::stoi(isoDate.substr(5, 2));
+        d = std::stoi(isoDate.substr(8, 2));
+    } catch (...) { return isoDate; }
+    if (m < 1 || m > 12) return isoDate;
+    return std::string(months[m - 1]) + " " + std::to_string(d) + ", " + std::to_string(y);
+}
+
+// Format "2026-03-01 14:30:05" → "Mar 1, 2026 at 2:30 PM"
+inline std::string formatTimestamp(const std::string& ts) {
+    if (ts.size() < 19) return formatDate(ts);
+    std::string datePart = formatDate(ts.substr(0, 10));
+    int h = 0, mi = 0;
+    try {
+        h  = std::stoi(ts.substr(11, 2));
+        mi = std::stoi(ts.substr(14, 2));
+    } catch (...) { return datePart; }
+    std::string ampm = h >= 12 ? "PM" : "AM";
+    int h12 = h % 12;
+    if (h12 == 0) h12 = 12;
+    std::ostringstream s;
+    s << datePart << " at " << h12 << ':' << std::setfill('0') << std::setw(2) << mi << " " << ampm;
+    return s.str();
+}
+
+// Compute a date N days from now, as ISO string
+inline std::string dateOffsetDays(int days) {
+    std::time_t t = std::time(nullptr);
+    t += days * 86400;
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d", std::localtime(&t));
     return buf;
 }
 

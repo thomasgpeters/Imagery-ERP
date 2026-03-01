@@ -11,6 +11,8 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WComboBox.h>
 #include <Wt/WMessageBox.h>
+#include <Wt/WDateEdit.h>
+#include <Wt/WDate.h>
 
 QuoteView::QuoteView(ppc::ProjectData& data)
     : data_(data)
@@ -61,7 +63,8 @@ void QuoteView::refresh()
             "<div class=\"est-client\">"
             "<span class=\"field-label\">Client:</span> " + est.clientName +
             " (" + est.clientCompany + ")"
-            " &mdash; <span class=\"field-label\">Valid Until:</span> " + est.validUntil +
+            " &mdash; <span class=\"field-label\">Valid Until:</span> " + ppc::formatDate(est.validUntil) +
+            " &mdash; <span class=\"field-label\">Created:</span> " + ppc::formatDate(est.createdAt) +
             "</div>"
         ));
 
@@ -138,7 +141,7 @@ void QuoteView::refresh()
                     "<div class=\"signature-block\">"
                     "<div class=\"sig-line\">" + sig.signatureData + "</div>"
                     "<div class=\"sig-details\">" + sig.signerName + ", " + sig.signerTitle +
-                    " &mdash; " + sig.signedAt + "</div>"
+                    " &mdash; " + ppc::formatTimestamp(sig.signedAt) + "</div>"
                     "</div>"));
             }
         } else {
@@ -281,9 +284,15 @@ void QuoteView::refresh()
     markupIn->setStyleClass("input-field input-sm");
     r3->addWidget(ppc::xhtml("<span class=\"field-unit\">%</span>"));
 
+    r3->addWidget(ppc::xhtml("<span class=\"field-label\">Valid Until:</span>"));
+    auto validUntilEdit = r3->addWidget(std::make_unique<Wt::WDateEdit>());
+    validUntilEdit->setDate(Wt::WDate::currentDate().addDays(30));
+    validUntilEdit->setFormat("MMM d, yyyy");
+    validUntilEdit->setStyleClass("input-field input-date");
+
     auto createBtn = form->addWidget(std::make_unique<Wt::WPushButton>("Create Estimate (all components)"));
     createBtn->setStyleClass("btn btn-primary mt-1");
-    createBtn->clicked().connect([this, nameIn, clientIn, emailIn, markupIn]() {
+    createBtn->clicked().connect([this, nameIn, clientIn, emailIn, markupIn, validUntilEdit]() {
         auto name = nameIn->text().toUTF8();
         if (!name.empty()) {
             ppc::Estimate est;
@@ -295,6 +304,11 @@ void QuoteView::refresh()
             est.clientEmail = emailIn->text().toUTF8();
             est.markupPct = markupIn->value();
             est.createdAt = ppc::currentDate();
+            auto validDate = validUntilEdit->date();
+            if (validDate.isValid())
+                est.validUntil = validDate.toString("yyyy-MM-dd").toUTF8();
+            else
+                est.validUntil = ppc::dateOffsetDays(30);
             est.sharedLinkToken = "est_" + std::to_string(data_.genId());
             for (auto& c : data_.components) est.componentIds.push_back(c.id);
             data_.recalcEstimate(est);
