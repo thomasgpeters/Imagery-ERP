@@ -10,6 +10,7 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WPopupMenu.h>
 #include "DataModels.h"
+#include "IDataProvider.h"
 
 class DashboardView;
 class ResourceView;
@@ -27,6 +28,8 @@ public:
     App(const Wt::WEnvironment& env);
 
 private:
+    // Data provider (standalone SQLite or enterprise API, per app_config.yaml)
+    std::unique_ptr<ppc::IDataProvider> dataProvider_;
     ppc::ProjectData data_;
 
     // Layout containers

@@ -32,8 +32,14 @@ App::App(const Wt::WEnvironment& env)
     // Load custom CSS
     useStyleSheet("style.css");
 
-    // Load sample data
-    data_.loadSampleData();
+    // Create data provider based on architecture_mode in app_config.yaml.
+    // This reads the config file and instantiates either:
+    //   - StandaloneDataProvider (local SQLite / in-memory)
+    //   - EnterpriseDataProvider (REST API to ApiLogicServer + PostgreSQL)
+    dataProvider_ = ppc::createDataProvider("app_config.yaml");
+
+    // Load project data via the selected provider
+    dataProvider_->loadProjectData(data_);
 
     // Build the UI
     buildLayout();
@@ -218,8 +224,12 @@ void App::buildSidebar()
     settingsBtn->setStyleClass("sidebar-nav-btn sidebar-settings-btn");
     settingsBtn->clicked().connect(this, &App::showSettingsDialog);
 
+    // Show version and active architecture mode
+    std::string modeLabel = dataProvider_ ? dataProvider_->backendDescription() : "unknown";
     footer->addWidget(ppc::xhtml(
         "<div class=\"sidebar-version\">v1.0.0</div>"
+        "<div class=\"sidebar-version\" style=\"font-size:0.65rem;opacity:0.6;margin-top:2px;\">"
+        + modeLabel + "</div>"
     ));
 }
 

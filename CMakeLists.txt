@@ -65,6 +65,7 @@ endif()
 add_executable(project_planner
     src/main.cpp
     src/App.cpp
+    src/DataProviderFactory.cpp
     src/DashboardView.cpp
     src/ResourceView.cpp
     src/ComponentView.cpp
@@ -82,5 +83,6 @@ target_link_libraries(project_planner ${WT_LIBS} ${PDF_LIBS})
 # Suppress deprecation warnings from Wt headers (WLogger.h uses sprintf)
 target_compile_options(project_planner PRIVATE -Wno-deprecated-declarations)
 
-# Copy resources to build directory
+# Copy resources and config to build directory
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY app_config.yaml DESTINATION ${CMAKE_BINARY_DIR})

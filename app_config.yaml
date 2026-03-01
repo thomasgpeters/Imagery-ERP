@@ -1,0 +1,43 @@
+# =============================================================================
+# Imagery-ERP Application Configuration
+#
+# This file controls the application's data architecture mode and connection
+# settings. Changes take effect on application restart.
+# =============================================================================
+
+# Architecture mode: "standalone" or "enterprise"
+#
+#   standalone  — All data stored locally in SQLite. No external dependencies.
+#                 Ideal for single-user, demo, or offline operation.
+#
+#   enterprise  — Data served via REST API (e.g. ApiLogicServer + PostgreSQL).
+#                 Required for multi-user, multi-tenant production deployments.
+#
+architecture_mode: standalone
+
+# ---------------------------------------------------------------------------
+# Standalone mode settings (used when architecture_mode = standalone)
+# ---------------------------------------------------------------------------
+standalone:
+  # Path to the SQLite database file. Relative paths are resolved from the
+  # application's working directory.
+  database_path: data/imagery_erp.sqlite
+
+  # Load built-in sample data when the database is first created.
+  seed_sample_data: true
+
+# ---------------------------------------------------------------------------
+# Enterprise mode settings (used when architecture_mode = enterprise)
+# ---------------------------------------------------------------------------
+enterprise:
+  # Base URL of the ApiLogicServer REST API (no trailing slash).
+  api_base_url: http://localhost:5656/api
+
+  # API authentication token (leave empty for unauthenticated dev mode).
+  api_token: ""
+
+  # Request timeout in seconds.
+  request_timeout_seconds: 30
+
+  # Connection pool size for concurrent API requests.
+  connection_pool_size: 5

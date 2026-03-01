@@ -9,3 +9,11 @@ CMakeCache.txt
 CMakeFiles/
 compile_commands.json
 .cache/
+
+# Local config overrides (app_config.yaml itself is tracked with safe defaults)
+app_config.local.yaml
+
+# SQLite database files (standalone mode)
+data/
+*.sqlite
+*.sqlite3
