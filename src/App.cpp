@@ -151,6 +151,10 @@ void App::buildTopbar()
     auto settingsItem = popup->addItem("Settings");
     settingsItem->triggered().connect(this, &App::showSettingsDialog);
 
+    // About option
+    auto aboutItem = popup->addItem("About Imagery ERP");
+    aboutItem->triggered().connect(this, &App::showAboutDialog);
+
     userBtn_->setMenu(std::move(popup));
 }
 
@@ -162,15 +166,12 @@ void App::buildSidebar()
     auto brand = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
     brand->setStyleClass("sidebar-brand");
 
-    // Logo — light and dark variants, toggled via CSS theme class
+    // Logo — white variant used on the dark sidebar background in both themes
     auto logoContainer = brand->addWidget(std::make_unique<Wt::WContainerWidget>());
     logoContainer->setStyleClass("sidebar-logo");
-    auto logoLight = logoContainer->addWidget(std::make_unique<Wt::WImage>("images/ImageryBusinessLogo.png"));
-    logoLight->setStyleClass("sidebar-logo-img sidebar-logo-light");
-    logoLight->setAlternateText("Imagery Solutions");
-    auto logoDark = logoContainer->addWidget(std::make_unique<Wt::WImage>("images/ImageryBusinessLogo_white.png"));
-    logoDark->setStyleClass("sidebar-logo-img sidebar-logo-dark");
-    logoDark->setAlternateText("Imagery Solutions");
+    auto logoImg = logoContainer->addWidget(std::make_unique<Wt::WImage>("images/ImageryBusinessLogo_white.png"));
+    logoImg->setStyleClass("sidebar-logo-img");
+    logoImg->setAlternateText("Imagery Solutions");
 
     // Business name (configurable via Settings)
     brandNameText_ = brand->addWidget(std::make_unique<Wt::WText>());
@@ -407,6 +408,52 @@ void App::showSettingsDialog()
         }
         dialog->accept();
     });
+
+    dialog->show();
+}
+
+void App::showAboutDialog()
+{
+    auto dialog = addChild(std::make_unique<Wt::WDialog>("About Imagery ERP"));
+    dialog->setStyleClass("settings-dialog about-dialog");
+    dialog->setModal(true);
+    dialog->setMovable(true);
+    dialog->rejectWhenEscapePressed(true);
+    dialog->setWidth(Wt::WLength(480));
+
+    auto content = dialog->contents();
+    content->setStyleClass("about-content");
+
+    // Centered logo
+    auto logoImg = content->addWidget(std::make_unique<Wt::WImage>("images/ImageryBusinessLogo.png"));
+    logoImg->setStyleClass("about-logo");
+    logoImg->setAlternateText("Imagery Solutions");
+
+    // Application description
+    content->addWidget(ppc::xhtml(
+        "<div class=\"about-description\">"
+        "Imagery ERP is a comprehensive project planning and costing platform "
+        "built for professional services firms. Plan resource allocations, "
+        "manage materials and expenses, build detailed cost analyses, "
+        "generate client-ready quotes, and track execution through agile sprints "
+        "and change orders &mdash; all in one integrated workspace."
+        "</div>"
+    ));
+
+    // Version and copyright
+    content->addWidget(ppc::xhtml(
+        "<div class=\"about-meta\">"
+        "<div class=\"about-version\">Version 1.0.0</div>"
+        "<div class=\"about-copyright\">&copy; 2026 Imagery Solutions. All rights reserved.</div>"
+        "</div>"
+    ));
+
+    // Close button
+    auto footer = dialog->footer();
+    footer->setStyleClass("settings-footer");
+    auto closeBtn = footer->addWidget(std::make_unique<Wt::WPushButton>("Close"));
+    closeBtn->setStyleClass("btn btn-primary");
+    closeBtn->clicked().connect(dialog, &Wt::WDialog::accept);
 
     dialog->show();
 }

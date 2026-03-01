@@ -281,8 +281,9 @@ body > div,
     min-width: 180px;
     border: 1px solid var(--border-color) !important;
     border-radius: 8px;
-    background: var(--bg-secondary) !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    background: var(--bg-card) !important;
+    opacity: 1 !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
     padding: 4px 0;
     z-index: 1000;
     list-style: none !important;
@@ -385,12 +386,6 @@ body > div,
     display: block;
     margin: 0 auto;
 }
-/* Light theme: show standard logo, hide white logo */
-.theme-light .sidebar-logo-dark  { display: none; }
-.theme-light .sidebar-logo-light { display: block; }
-/* Dark theme: show white logo, hide standard logo */
-.theme-dark .sidebar-logo-light { display: none; }
-.theme-dark .sidebar-logo-dark  { display: block; }
 .sidebar-business-name {
     font-size: 15px;
     font-weight: 700;
@@ -560,6 +555,40 @@ body > div,
     padding: 12px 24px 16px;
     border-top: 1px solid var(--border-color);
     background: var(--bg-card);
+}
+
+/* ---- About Dialog -------------------------------------------------------- */
+.about-content {
+    padding: 32px 32px 24px;
+    text-align: center;
+    background: var(--bg-card);
+}
+.about-logo {
+    max-width: 260px;
+    max-height: 80px;
+    display: block;
+    margin: 0 auto 24px;
+}
+.about-description {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    text-align: left;
+}
+.about-meta {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+.about-version {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.about-copyright {
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 /* ---- Work Area ----------------------------------------------------------- */
