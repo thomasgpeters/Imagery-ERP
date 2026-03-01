@@ -120,24 +120,10 @@ void App::buildTopbar()
     ));
 
     // User profile button — opens dropdown with role switcher
-    auto userBtn = rightSection->addWidget(std::make_unique<Wt::WPushButton>());
-    userBtn->setTextFormat(Wt::TextFormat::XHTML);
-    userBtn->setStyleClass("topbar-user-btn");
-
-    // Role badge shows active role next to the user info
-    userRoleBadge_ = rightSection->addWidget(std::make_unique<Wt::WText>());
-    userRoleBadge_->setTextFormat(Wt::TextFormat::XHTML);
-    userRoleBadge_->setText("<span class=\"role-badge planning\">Planning</span>");
-
-    // Build the user button content
-    userBtn->setText(
-        "<span class=\"user-avatar\">SC</span>"
-        "<span class=\"user-info\">"
-        "<span class=\"user-name\">Sarah Chen</span>"
-        "<span class=\"user-role\">Project Manager</span>"
-        "</span>"
-        "<span class=\"user-chevron\">&#9662;</span>"
-    );
+    userBtn_ = rightSection->addWidget(std::make_unique<Wt::WPushButton>());
+    userBtn_->setTextFormat(Wt::TextFormat::XHTML);
+    userBtn_->setStyleClass("topbar-user-btn");
+    updateUserButton();
 
     // Create popup menu
     auto popup = std::make_unique<Wt::WPopupMenu>();
@@ -162,7 +148,7 @@ void App::buildTopbar()
     auto settingsItem = popup->addItem("Settings");
     settingsItem->triggered().connect(this, &App::showSettingsDialog);
 
-    userBtn->setMenu(std::move(popup));
+    userBtn_->setMenu(std::move(popup));
 }
 
 void App::buildSidebar()
@@ -284,18 +270,38 @@ void App::switchRole(AppRole role)
     if (role == activeRole_) return;
     activeRole_ = role;
 
-    // Update role badge in topbar
-    if (role == AppRole::Planning) {
-        userRoleBadge_->setText("<span class=\"role-badge planning\">Planning</span>");
-    } else {
-        userRoleBadge_->setText("<span class=\"role-badge execution\">Execution</span>");
-    }
+    // Update user button text (name, title, role icon)
+    updateUserButton();
 
     // Rebuild navigation for new role
     buildNavForRole();
 
     // Show Dashboard (always index 0 in workarea)
     showView(0);
+}
+
+void App::updateUserButton()
+{
+    std::string roleIcon, roleClass, jobTitle;
+    if (activeRole_ == AppRole::Planning) {
+        roleIcon  = "&#9998;";   // pencil / planning icon
+        roleClass = "role-icon planning";
+        jobTitle  = "Planning Manager";
+    } else {
+        roleIcon  = "&#9654;";   // play / execution icon
+        roleClass = "role-icon execution";
+        jobTitle  = "Project Manager";
+    }
+
+    userBtn_->setText(
+        "<span class=\"" + roleClass + "\">" + roleIcon + "</span>"
+        "<span class=\"user-avatar\">SC</span>"
+        "<span class=\"user-info\">"
+        "<span class=\"user-name\">Sarah Chen</span>"
+        "<span class=\"user-title\">" + jobTitle + "</span>"
+        "</span>"
+        "<span class=\"user-chevron\">&#9662;</span>"
+    );
 }
 
 void App::showView(int viewIndex)

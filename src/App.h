@@ -41,7 +41,7 @@ private:
 
     // Role state
     AppRole activeRole_ = AppRole::Planning;
-    Wt::WText* userRoleBadge_ = nullptr;
+    Wt::WPushButton* userBtn_ = nullptr;
 
     // Each nav button maps to a view index in the workarea
     std::vector<int> navViewMap_;
@@ -70,6 +70,7 @@ private:
     void buildTopbar();
     void buildNavForRole();
     void switchRole(AppRole role);
+    void updateUserButton();
     void showView(int viewIndex);
     void toggleTheme();
     void setNavActive(int navIdx);
