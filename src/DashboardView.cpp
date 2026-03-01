@@ -85,7 +85,7 @@ void DashboardView::refresh()
         roleTable->elementAt(row, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(sellRate)));
         roleTable->elementAt(row, c++)->setStyleClass("cell-right");
         roleTable->elementAt(row, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(totalCost * (1.0 + data_.markupPct / 100.0))));
-        roleTable->elementAt(row, c)->setStyleClass("cell-right");
+        roleTable->elementAt(row, c)->setStyleClass("cell-right cell-bold");
     }
 
     // Totals row
