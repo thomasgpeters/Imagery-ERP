@@ -182,8 +182,8 @@ Rule.constraint(validate=Role, as_condition=lambda row: row.base_rate >= 0, erro
 
 **Why PostgreSQL:**
 - **Robust relational model** — The project planning domain is inherently relational (roles have rates, components have resources, sprints have components, estimates have components, etc.)
-- **Computed views** — SQL views (`v_project_summary`, `v_phase_cost`, etc.) push computation to the database where it's most efficient
-- **Stored functions** — `generate_sprints()`, `recalculate_estimate()`, etc. encapsulate complex operations close to the data
+- **Computed views** — 10 SQL views (`v_project_summary`, `v_component_cost`, `v_material_summary`, `v_phase_cost`, etc.) push computation to the database where it's most efficient
+- **Stored functions** — 5 functions (`generate_sprints()`, `recalculate_estimate()`, etc.) encapsulate complex operations close to the data
 - **JSONB support** — The `audit_log.old_values` / `new_values` columns use JSONB for flexible change tracking
 - **Extensions** — `uuid-ossp` for UUID generation, `pgcrypto` for secure hashing
 - **ApiLogicServer compatibility** — ApiLogicServer's SQLAlchemy integration works best with PostgreSQL
@@ -203,8 +203,8 @@ All tables live in the `ppc` schema (not `public`) to keep the namespace clean a
 
 **Naming Conventions:**
 - Tables: `snake_case` singular (`role`, `component`, `sprint`)
-- Junction tables: `parent_child` (`sprint_component`, `component_resource`, `estimate_component`)
-- Views: `v_` prefix (`v_project_summary`, `v_role_rates`)
+- Junction tables: `parent_child` (`sprint_component`, `component_resource`, `component_material`, `estimate_component`)
+- Views: `v_` prefix (`v_project_summary`, `v_role_rates`, `v_material_summary`)
 - Functions: descriptive verbs (`generate_sprints`, `recalculate_estimate`)
 
 **Fully Loaded Rate Pattern:**

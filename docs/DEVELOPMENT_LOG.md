@@ -327,4 +327,104 @@ All date displays across the app now use the friendly formatters:
 
 ---
 
+## Session 5 — Schema & Seed Data Synchronization with Materials Feature
+
+**Date:** 2026-03-01
+**Branch:** `claude/project-planning-costing-app-Z04yA`
+
+### Objectives
+
+Synchronize the PostgreSQL schema (`database/schema.sql`) and seed data (`database/seed_data.sql`) with the Materials & Expenses feature added to `DataModels.h` in Session 3, ensuring the persistence layer is ready for ApiLogicServer middleware generation.
+
+### Gap Analysis
+
+Performed a full audit comparing all three files. Key findings:
+- **2 new tables** needed: `material` and `component_material` (existed in C++ but not SQL)
+- **3 views** needed updating to include material costs alongside labor costs
+- **1 function** (`recalculate_estimate`) needed to sum both labor and material costs
+- **Material IDs misaligned**: C++ used IDs 20–28, SQL seed data would use 1–9
+
+### Work Completed
+
+#### 1. New Tables (`schema.sql`)
+
+Added **`material`** table (section 8):
+- `id`, `company_id` (FK), `name`, `description`, `category` (CHECK: Office Supplies, Construction, Equipment/Tools, Travel, Software/Licenses, Other), `unit`, `unit_cost`, `is_active`, `sort_order`, timestamps
+- Indexes on `company_id` and `category`
+- UNIQUE constraint on `(company_id, name)`
+
+Added **`component_material`** junction table (section 10):
+- `id`, `component_id` (FK → component), `material_id` (FK → material), `quantity`, `notes`, timestamps
+- UNIQUE constraint on `(component_id, material_id)`
+- Indexes on both foreign keys
+
+#### 2. Updated Views
+
+- **`v_component_cost`** — Now returns `labor_cost`, `material_cost`, and combined `total_cost` (plus `role_count` and `material_count`) using subquery JOINs for labor and materials
+- **`v_project_summary`** — Now includes `labor_cost`, `material_cost`, and combined `total_cost`/`total_sell`/`margin_amount` using subquery JOINs
+
+#### 3. New View
+
+- **`v_material_summary`** — Aggregates material usage across all components: `total_quantity`, `total_cost`, `component_count` per material
+
+#### 4. Updated Function
+
+- **`recalculate_estimate()`** — Cross-joins labor and material subqueries to compute combined `total_cost` including both labor hours and material expenses
+
+#### 5. New Triggers
+
+Added `BEFORE UPDATE` triggers for both new tables:
+- `trg_material_updated` → `update_timestamp()`
+- `trg_comp_mat_updated` → `update_timestamp()`
+
+#### 6. Seed Data (`seed_data.sql`)
+
+Added 9 materials (IDs 1–9) matching `DataModels.h`:
+
+| ID | Material | Category | Unit | Unit Cost |
+|----|----------|----------|------|-----------|
+| 1 | Cloud Hosting (Monthly) | Software/Licenses | month | $2,400 |
+| 2 | CI/CD Pipeline Licenses | Software/Licenses | month | $350 |
+| 3 | SSL Certificates | Software/Licenses | unit | $250 |
+| 4 | Monitoring & APM Tools | Software/Licenses | month | $450 |
+| 5 | UX Research Incentives | Other | unit | $50 |
+| 6 | Team Travel — On-site Kick-off | Travel | trip | $1,800 |
+| 7 | Printing & Documentation | Office Supplies | lot | $180 |
+| 8 | Security Pen-Test Service | Other | unit | $4,500 |
+| 9 | Load Testing Platform | Software/Licenses | month | $600 |
+
+Added 14 component-material assignment rows across 8 components (1, 4, 5, 7, 10, 13, 14, 15).
+
+Added verification queries for `v_material_summary`, `v_component_cost` (with materials), and `v_project_summary` (with materials).
+
+#### 7. C++ Material ID Alignment (`DataModels.h`)
+
+Changed material IDs from 20–28 → 1–9 and updated all 14 component material references to match the SQL seed data, ensuring consistency when ALS middleware is generated.
+
+#### 8. Section Renumbering
+
+- **schema.sql**: Renumbered all sections 1–25 (was 1–23, now includes sections 8 and 10 for the new tables)
+- **seed_data.sql**: Renumbered all sections 1–17 (was 1–15, now includes sections 10 and 11 for materials)
+
+### Commits
+
+| Hash | Message |
+|------|---------|
+| `241905f` | Sync schema and seed data with Materials feature in DataModels.h |
+
+### Statistics
+
+| Category | Count |
+|----------|-------|
+| Files changed | 3 |
+| Lines inserted | ~267 |
+| PostgreSQL tables (total) | 25 (was 23) |
+| PostgreSQL views (total) | 10 (was 8) |
+| Stored functions | 5 (unchanged) |
+| Triggers (total) | 15 (was 13) |
+| Seed data materials | 9 |
+| Seed data component-material rows | 14 |
+
+---
+
 *This log is maintained as the project evolves. Each development session adds a new dated entry with objectives, work completed, and relevant details.*
