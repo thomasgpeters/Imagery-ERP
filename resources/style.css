@@ -115,6 +115,11 @@ body > div,
     width: 100% !important;
     overflow: hidden !important;
 }
+/* Ensure all Wt dialogs get an opaque background by default */
+.Wt-dialog {
+    background: var(--bg-card) !important;
+    color: var(--text-primary);
+}
 
 /* ---- App Shell (row: sidebar | main column) ------------------------------ */
 .app-shell {
@@ -498,14 +503,20 @@ body > div,
 }
 
 /* ---- Settings Dialog ----------------------------------------------------- */
-.settings-dialog .Wt-dialog {
+/* Both classes land on the same element, so use combined selector (no space) */
+.settings-dialog.Wt-dialog {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
-    background: var(--bg-card);
+    background: var(--bg-card) !important;
     color: var(--text-primary);
+    overflow: hidden;
 }
-.settings-dialog .titlebar {
+/* Wt wraps content in a .body div inside the dialog */
+.settings-dialog.Wt-dialog .body {
+    background: var(--bg-card);
+}
+.settings-dialog.Wt-dialog .titlebar {
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
@@ -513,8 +524,13 @@ body > div,
     font-weight: 600;
     border-radius: 12px 12px 0 0;
 }
+/* Modal backdrop */
+.Wt-dialogcover {
+    background: rgba(0, 0, 0, 0.45) !important;
+}
 .settings-content {
     padding: 20px 24px;
+    background: var(--bg-card);
 }
 .settings-section-title {
     font-size: 13px;
@@ -530,6 +546,7 @@ body > div,
 .settings-field .field-label {
     display: block;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 .settings-hint {
     font-size: 12px;
@@ -547,6 +564,7 @@ body > div,
     gap: 8px;
     padding: 12px 24px 16px;
     border-top: 1px solid var(--border-color);
+    background: var(--bg-card);
 }
 
 /* ---- Work Area ----------------------------------------------------------- */
