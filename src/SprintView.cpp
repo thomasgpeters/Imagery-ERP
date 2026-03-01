@@ -126,7 +126,7 @@ void SprintView::refresh()
     content_->addWidget(ppc::xhtml(
         "<div class=\"info-callout\">"
         "<strong>Project Ceremony Overhead:</strong> " +
-        ppc::formatNumber(totalCerHrs, 1) + " hrs/sprint &times; " +
+        ppc::formatNumber(totalCerHrs, 1) + " hrs/sprint &#215; " +
         std::to_string(data_.sprints.size()) + " sprints = <strong>" +
         ppc::formatNumber(totalCerPerProject, 0) + " hrs</strong> per team member"
         "</div>"
@@ -150,7 +150,7 @@ void SprintView::refresh()
             "<div class=\"sprint-header\">"
             "<div class=\"sprint-name\">" + sprint.name + " " + statusBadge + "</div>"
             "<div class=\"sprint-weeks\">Weeks " + std::to_string(sprint.startWeek) +
-            " &ndash; " + std::to_string(sprint.endWeek) + "</div>"
+            " &#8211; " + std::to_string(sprint.endWeek) + "</div>"
             "</div>"
         ));
 

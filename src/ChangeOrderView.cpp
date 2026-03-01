@@ -127,7 +127,7 @@ void ChangeOrderView::refresh()
                     "<div class=\"signature-block\">"
                     "<div class=\"sig-line\">" + sig.signatureData + "</div>"
                     "<div class=\"sig-details\">" + sig.signerName + ", " + sig.signerTitle +
-                    " &mdash; " + ppc::formatTimestamp(sig.signedAt) + "</div></div>"));
+                    " &#8212; " + ppc::formatTimestamp(sig.signedAt) + "</div></div>"));
             }
         }
 
