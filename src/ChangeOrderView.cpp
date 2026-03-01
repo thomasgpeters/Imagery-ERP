@@ -10,6 +10,8 @@
 #include <Wt/WDoubleSpinBox.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WComboBox.h>
+#include <Wt/WDateEdit.h>
+#include <Wt/WDate.h>
 
  ChangeOrderView::ChangeOrderView(ppc::ProjectData& data)
     : data_(data)
@@ -50,7 +52,7 @@ void ChangeOrderView::refresh()
         coCard->addWidget(ppc::xhtml(
             "<div class=\"co-meta\">"
             "<span><strong>Requested by:</strong> " + co.requestedBy + "</span>"
-            "<span><strong>Date:</strong> " + co.requestedDate + "</span>"
+            "<span><strong>Date:</strong> " + ppc::formatDate(co.requestedDate) + "</span>"
             "<span><strong>Schedule Impact:</strong> " +
             (co.scheduleImpactWeeks > 0 ? "+" + std::to_string(co.scheduleImpactWeeks) + " weeks" : "None") +
             "</span></div>"
@@ -125,7 +127,7 @@ void ChangeOrderView::refresh()
                     "<div class=\"signature-block\">"
                     "<div class=\"sig-line\">" + sig.signatureData + "</div>"
                     "<div class=\"sig-details\">" + sig.signerName + ", " + sig.signerTitle +
-                    " &mdash; " + sig.signedAt + "</div></div>"));
+                    " &mdash; " + ppc::formatTimestamp(sig.signedAt) + "</div></div>"));
             }
         }
 
@@ -172,6 +174,12 @@ void ChangeOrderView::refresh()
     reqByIn->setPlaceholderText("Requester name");
     reqByIn->setStyleClass("input-field");
 
+    r2->addWidget(ppc::xhtml("<span class=\"field-label\">Request Date:</span>"));
+    auto reqDateEdit = r2->addWidget(std::make_unique<Wt::WDateEdit>());
+    reqDateEdit->setDate(Wt::WDate::currentDate());
+    reqDateEdit->setFormat("MMM d, yyyy");
+    reqDateEdit->setStyleClass("input-field input-date");
+
     form->addWidget(ppc::xhtml("<span class=\"field-label\">Description:</span>"));
     auto descIn = form->addWidget(std::make_unique<Wt::WTextArea>());
     descIn->setPlaceholderText("Describe what is changing...");
@@ -203,7 +211,7 @@ void ChangeOrderView::refresh()
 
     auto createBtn = form->addWidget(std::make_unique<Wt::WPushButton>("Submit Change Order"));
     createBtn->setStyleClass("btn btn-primary mt-1");
-    createBtn->clicked().connect([this, titleIn, reqByIn, descIn, reasonIn, hrsIn, schedIn]() {
+    createBtn->clicked().connect([this, titleIn, reqByIn, reqDateEdit, descIn, reasonIn, hrsIn, schedIn]() {
         auto title = titleIn->text().toUTF8();
         if (!title.empty()) {
             ppc::ChangeOrder co;
@@ -219,7 +227,10 @@ void ChangeOrderView::refresh()
             co.additionalCost = co.additionalHours * data_.getBlendedCostRate();
             co.additionalSell = co.additionalCost * (1.0 + data_.markupPct / 100.0);
             co.status = "Pending Review";
-            co.requestedDate = ppc::currentDate();
+            auto reqDate = reqDateEdit->date();
+            co.requestedDate = reqDate.isValid()
+                ? reqDate.toString("yyyy-MM-dd").toUTF8()
+                : ppc::currentDate();
             data_.changeOrders.push_back(co);
             refresh();
         }

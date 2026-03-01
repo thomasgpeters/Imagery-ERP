@@ -44,8 +44,8 @@ std::string PdfExporter::generateHtml(const ProjectData& data, const Estimate& e
     html << "<h2>" << estimate.estimateNumber << " — " << estimate.name << "</h2>";
     html << "<p><strong>Client:</strong> " << estimate.clientName
          << " (" << estimate.clientCompany << ")<br>"
-         << "<strong>Date:</strong> " << estimate.createdAt << "<br>"
-         << "<strong>Valid Until:</strong> " << estimate.validUntil << "<br>"
+         << "<strong>Date:</strong> " << formatDate(estimate.createdAt) << "<br>"
+         << "<strong>Valid Until:</strong> " << formatDate(estimate.validUntil) << "<br>"
          << "<strong>Version:</strong> " << estimate.version << "</p>";
 
     // Summary metrics
@@ -135,7 +135,7 @@ std::string PdfExporter::generateHtml(const ProjectData& data, const Estimate& e
             html << "<p><span class='sig-line'>" << sig.signatureData << "</span></p>"
                  << "<p>" << sig.signerName << ", " << sig.signerTitle << "<br>"
                  << sig.signerEmail << "<br>"
-                 << "Signed: " << sig.signedAt << "</p>";
+                 << "Signed: " << formatTimestamp(sig.signedAt) << "</p>";
         }
     } else {
         html << "<p>Signature: ___________________________</p>"
@@ -198,7 +198,7 @@ std::string PdfExporter::exportEstimate(const ProjectData& data, const Estimate&
     y -= 15;
 
     HPDF_Page_BeginText(page);
-    std::string dateLine = "Valid Until: " + estimate.validUntil;
+    std::string dateLine = "Valid Until: " + formatDate(estimate.validUntil);
     HPDF_Page_TextOut(page, margin, y, dateLine.c_str());
     HPDF_Page_EndText(page);
     y -= 25;
