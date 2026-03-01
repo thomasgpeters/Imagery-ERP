@@ -40,6 +40,9 @@ private:
     Wt::WPushButton* themeToggle_ = nullptr;
     Wt::WContainerWidget* appShell_ = nullptr;
 
+    // Sidebar brand (updated by Settings)
+    Wt::WText* brandNameText_ = nullptr;
+
     // Views
     DashboardView*   dashboardView_   = nullptr;
     ResourceView*    resourceView_    = nullptr;
@@ -56,4 +59,5 @@ private:
     void toggleTheme();
     void setNavActive(int index);
     void refreshCurrentView();
+    void showSettingsDialog();
 };
