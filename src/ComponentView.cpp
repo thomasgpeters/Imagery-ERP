@@ -23,13 +23,13 @@ void ComponentView::refresh()
 {
     content_->clear();
 
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<h2 class=\"view-title\">Components &amp; Statement of Work</h2>"
         "<p class=\"view-subtitle\">Define estimable units of work with resource needs and SoW</p>"
     ));
 
     // ---- Component summary table --------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Component Estimates</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Component Estimates</h3>"));
     auto table = content_->addWidget(std::make_unique<Wt::WTable>());
     table->setStyleClass("data-table");
     table->setHeaderCount(1);
@@ -75,7 +75,7 @@ void ComponentView::refresh()
                         comp.complexity == "High" ? "high" :
                         comp.complexity == "Medium" ? "medium" : "low") +
             "\">" + comp.complexity + "</span>";
-        table->elementAt(row, col++)->addWidget(std::make_unique<Wt::WText>(complexSpan));
+        table->elementAt(row, col++)->addWidget(ppc::xhtml(complexSpan));
 
         table->elementAt(row, col)->addWidget(std::make_unique<Wt::WText>(ppc::formatNumber(hrs, 0)));
         table->elementAt(row, col++)->setStyleClass("cell-right");
@@ -88,7 +88,7 @@ void ComponentView::refresh()
             std::string(comp.status == "Approved" ? "approved" :
                         comp.status == "Estimated" ? "estimated" : "draft") +
             "\">" + comp.status + "</span>";
-        table->elementAt(row, col++)->addWidget(std::make_unique<Wt::WText>(statusSpan));
+        table->elementAt(row, col++)->addWidget(ppc::xhtml(statusSpan));
 
         auto delBtn = table->elementAt(row, col)->addWidget(std::make_unique<Wt::WPushButton>("Delete"));
         delBtn->setStyleClass("btn btn-danger btn-xs");
@@ -133,13 +133,13 @@ void ComponentView::refresh()
         auto detail = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
         detail->setStyleClass("component-detail-panel");
 
-        detail->addWidget(std::make_unique<Wt::WText>(
+        detail->addWidget(ppc::xhtml(
             "<h3 class=\"detail-title\">" + comp.name + "</h3>"
             "<p class=\"detail-desc\">" + comp.description + "</p>"
         ));
 
         // SoW
-        detail->addWidget(std::make_unique<Wt::WText>("<h4 class=\"detail-section\">Statement of Work</h4>"));
+        detail->addWidget(ppc::xhtml("<h4 class=\"detail-section\">Statement of Work</h4>"));
         auto sowArea = detail->addWidget(std::make_unique<Wt::WTextArea>(comp.statementOfWork));
         sowArea->setStyleClass("input-textarea");
         sowArea->setRows(6);
@@ -149,7 +149,7 @@ void ComponentView::refresh()
         });
 
         // Resource needs table
-        detail->addWidget(std::make_unique<Wt::WText>("<h4 class=\"detail-section\">Resource Requirements</h4>"));
+        detail->addWidget(ppc::xhtml("<h4 class=\"detail-section\">Resource Requirements</h4>"));
         auto resTable = detail->addWidget(std::make_unique<Wt::WTable>());
         resTable->setStyleClass("data-table data-table-compact");
         resTable->setHeaderCount(1);
@@ -202,13 +202,13 @@ void ComponentView::refresh()
         // Add resource to component
         auto addResRow = detail->addWidget(std::make_unique<Wt::WContainerWidget>());
         addResRow->setStyleClass("form-row-inline mt-1");
-        addResRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Add Role:</span>"));
+        addResRow->addWidget(ppc::xhtml("<span class=\"field-label\">Add Role:</span>"));
 
         auto roleCombo = addResRow->addWidget(std::make_unique<Wt::WComboBox>());
         roleCombo->setStyleClass("input-field");
         for (auto& r : data_.roles) roleCombo->addItem(r.name);
 
-        addResRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Hours:</span>"));
+        addResRow->addWidget(ppc::xhtml("<span class=\"field-label\">Hours:</span>"));
         auto hrsInput = addResRow->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
         hrsInput->setRange(0, 1000);
         hrsInput->setValue(20);
@@ -229,18 +229,18 @@ void ComponentView::refresh()
     }
 
     // ---- Add new component form ---------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Add New Component</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Add New Component</h3>"));
     auto addForm = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
     addForm->setStyleClass("add-form");
 
     auto row1 = addForm->addWidget(std::make_unique<Wt::WContainerWidget>());
     row1->setStyleClass("form-row-inline");
-    row1->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Name:</span>"));
+    row1->addWidget(ppc::xhtml("<span class=\"field-label\">Name:</span>"));
     auto nameIn = row1->addWidget(std::make_unique<Wt::WLineEdit>());
     nameIn->setPlaceholderText("Component name");
     nameIn->setStyleClass("input-field");
 
-    row1->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Phase:</span>"));
+    row1->addWidget(ppc::xhtml("<span class=\"field-label\">Phase:</span>"));
     auto phaseCombo = row1->addWidget(std::make_unique<Wt::WComboBox>());
     phaseCombo->setStyleClass("input-field");
     phaseCombo->addItem("— None —");
@@ -248,14 +248,14 @@ void ComponentView::refresh()
 
     auto row2 = addForm->addWidget(std::make_unique<Wt::WContainerWidget>());
     row2->setStyleClass("form-row-inline");
-    row2->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Description:</span>"));
+    row2->addWidget(ppc::xhtml("<span class=\"field-label\">Description:</span>"));
     auto descIn = row2->addWidget(std::make_unique<Wt::WLineEdit>());
     descIn->setPlaceholderText("Brief description");
     descIn->setStyleClass("input-field input-wide");
 
     auto row3 = addForm->addWidget(std::make_unique<Wt::WContainerWidget>());
     row3->setStyleClass("form-row-inline");
-    row3->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Statement of Work:</span>"));
+    row3->addWidget(ppc::xhtml("<span class=\"field-label\">Statement of Work:</span>"));
     auto sowIn = row3->addWidget(std::make_unique<Wt::WTextArea>());
     sowIn->setPlaceholderText("Detailed statement of work for this component...");
     sowIn->setRows(4);

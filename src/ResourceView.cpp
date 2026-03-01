@@ -20,7 +20,7 @@ void ResourceView::refresh()
 {
     content_->clear();
 
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<h2 class=\"view-title\">Roles &amp; Rates</h2>"
         "<p class=\"view-subtitle\">Define resource roles, hourly rates, and project markup</p>"
     ));
@@ -29,14 +29,14 @@ void ResourceView::refresh()
     auto markupRow = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
     markupRow->setStyleClass("form-row-inline");
 
-    markupRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Mark-up Rate:</span>"));
+    markupRow->addWidget(ppc::xhtml("<span class=\"field-label\">Mark-up Rate:</span>"));
     auto markupSpin = markupRow->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
     markupSpin->setRange(0, 200);
     markupSpin->setValue(data_.markupPct);
     markupSpin->setDecimals(1);
     markupSpin->setSingleStep(1.0);
     markupSpin->setStyleClass("input-field input-sm");
-    markupRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-unit\">%</span>"));
+    markupRow->addWidget(ppc::xhtml("<span class=\"field-unit\">%</span>"));
 
     markupSpin->valueChanged().connect([this](double val) {
         data_.markupPct = val;
@@ -44,7 +44,7 @@ void ResourceView::refresh()
     });
 
     // ---- Roles table --------------------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Defined Roles</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Defined Roles</h3>"));
     auto table = content_->addWidget(std::make_unique<Wt::WTable>());
     table->setStyleClass("data-table");
     table->setHeaderCount(1);
@@ -124,23 +124,23 @@ void ResourceView::refresh()
         table->elementAt(blendRow, i)->addStyleClass("total-row");
 
     // ---- Add role form ------------------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Add New Role</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Add New Role</h3>"));
     auto addRow = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
     addRow->setStyleClass("form-row-inline");
 
-    addRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Name:</span>"));
+    addRow->addWidget(ppc::xhtml("<span class=\"field-label\">Name:</span>"));
     auto nameInput = addRow->addWidget(std::make_unique<Wt::WLineEdit>());
     nameInput->setPlaceholderText("Role name");
     nameInput->setStyleClass("input-field");
 
-    addRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Base Rate: $</span>"));
+    addRow->addWidget(ppc::xhtml("<span class=\"field-label\">Base Rate: $</span>"));
     auto rateInput = addRow->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
     rateInput->setRange(0, 500);
     rateInput->setValue(50.0);
     rateInput->setDecimals(2);
     rateInput->setStyleClass("input-field input-sm");
 
-    addRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Overhead: $</span>"));
+    addRow->addWidget(ppc::xhtml("<span class=\"field-label\">Overhead: $</span>"));
     auto overInput = addRow->addWidget(std::make_unique<Wt::WDoubleSpinBox>());
     overInput->setRange(0, 200);
     overInput->setValue(10.0);

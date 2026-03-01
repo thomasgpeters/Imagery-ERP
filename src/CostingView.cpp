@@ -39,13 +39,13 @@ void CostingView::refresh()
     colTotals_.clear();
     grandTotal_ = nullptr;
 
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<h2 class=\"view-title\">Cost Analysis</h2>"
         "<p class=\"view-subtitle\">Resource time allocation and fully loaded cost breakdown</p>"
     ));
 
     // ---- Project Hours Grid -------------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Project Hours</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Project Hours</h3>"));
 
     auto scrollBox = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
     scrollBox->setStyleClass("grid-scroll");
@@ -114,7 +114,7 @@ void CostingView::refresh()
     hrsTable->elementAt(trow, data_.totalWeeks + 1)->setStyleClass("cell-right cell-bold total-row");
 
     // ---- Fully Loaded Cost Grid (read-only) ---------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Weekly — Fully Loaded Costs</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Weekly — Fully Loaded Costs</h3>"));
 
     auto costScroll = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
     costScroll->setStyleClass("grid-scroll");
@@ -166,7 +166,7 @@ void CostingView::refresh()
     costTable->elementAt(trow, data_.totalWeeks + 1)->setStyleClass("cell-right cell-bold total-row");
 
     // ---- Phased Pricing (Cost + Markup) -------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<h3 class=\"section-title\">Phased Pricing (Cost + " +
         ppc::formatPercent(data_.markupPct) + ")</h3>"));
 
