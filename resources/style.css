@@ -95,6 +95,11 @@
     padding: 0;
     box-sizing: border-box;
 }
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
 body {
     font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
@@ -103,23 +108,31 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
+/* Wt root container — must also fill viewport */
+body > div,
+.wt-root {
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+}
 
 /* ---- App Shell (row: sidebar | main column) ------------------------------ */
 .app-shell {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+    display: flex !important;
+    flex-direction: row !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
 }
 
 /* ---- Main Column (topbar + workarea, right of sidebar) ------------------- */
 .app-main {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
     min-width: 0;
     overflow: hidden;
+    height: 100%;
 }
 
 /* ---- Top Navigation Bar -------------------------------------------------- */
@@ -219,10 +232,11 @@ body {
 /* ---- Sidebar (full-height, left edge) ------------------------------------ */
 .app-sidebar {
     width: 250px;
+    height: 100%;
     background: var(--bg-sidebar);
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
     overflow-y: auto;
     border-right: 1px solid rgba(255,255,255,0.06);
 }
