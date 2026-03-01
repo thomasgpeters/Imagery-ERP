@@ -132,9 +132,9 @@ void App::buildSidebar()
     struct NavItem { std::string icon; std::string label; };
     std::vector<NavItem> navItems = {
         {"&#9632;", "Dashboard"},
-        {"&#9881;", "Roles & Rates"},
-        {"&#9638;", "Components & SoW"},
-        {"&#9654;", "Sprints & Agile"},
+        {"&#9881;", "Roles &amp; Rates"},
+        {"&#9638;", "Components &amp; SoW"},
+        {"&#9654;", "Sprints &amp; Agile"},
         {"&#9733;", "Cost Analysis"},
         {"&#9830;", "Quote Builder"},
         {"&#8635;", "Change Orders"},
