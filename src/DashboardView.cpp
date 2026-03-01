@@ -18,7 +18,7 @@ void DashboardView::refresh()
     content_->clear();
 
     // View title
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<h2 class=\"view-title\">Dashboard</h2>"
         "<p class=\"view-subtitle\">" + data_.projectName + " &mdash; " + data_.clientName + "</p>"
     ));
@@ -31,7 +31,7 @@ void DashboardView::refresh()
                        const std::string& sub, const std::string& accent) {
         auto card = metrics->addWidget(std::make_unique<Wt::WContainerWidget>());
         card->setStyleClass("metric-card " + accent);
-        card->addWidget(std::make_unique<Wt::WText>(
+        card->addWidget(ppc::xhtml(
             "<div class=\"mc-label\">" + label + "</div>"
             "<div class=\"mc-value\">" + value + "</div>"
             "<div class=\"mc-sub\">" + sub + "</div>"
@@ -48,7 +48,7 @@ void DashboardView::refresh()
     addCard("Components",        std::to_string(data_.components.size()),    "estimable units of work", "accent-orange");
 
     // ---- Role summary table -------------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Role Summary</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Role Summary</h3>"));
     auto roleTable = content_->addWidget(std::make_unique<Wt::WTable>());
     roleTable->setStyleClass("data-table");
     roleTable->setHeaderCount(1);
@@ -106,7 +106,7 @@ void DashboardView::refresh()
 
     // ---- Phase summary table ------------------------------------------------
     if (!data_.phases.empty()) {
-        content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Phase Summary</h3>"));
+        content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Phase Summary</h3>"));
         auto phaseTable = content_->addWidget(std::make_unique<Wt::WTable>());
         phaseTable->setStyleClass("data-table");
         phaseTable->setHeaderCount(1);
@@ -154,7 +154,7 @@ void DashboardView::refresh()
     }
 
     // ---- Agile ceremony overhead per sprint ---------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Agile Ceremony Overhead (per Sprint)</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Agile Ceremony Overhead (per Sprint)</h3>"));
     auto cerTable = content_->addWidget(std::make_unique<Wt::WTable>());
     cerTable->setStyleClass("data-table");
     cerTable->setHeaderCount(1);

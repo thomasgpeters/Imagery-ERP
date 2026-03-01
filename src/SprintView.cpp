@@ -22,7 +22,7 @@ void SprintView::refresh()
 {
     content_->clear();
 
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<h2 class=\"view-title\">Sprints &amp; Agile Ceremonies</h2>"
         "<p class=\"view-subtitle\">Manage sprints (" + std::to_string(data_.sprintLengthWeeks) +
         "-week intervals) and Agile ceremony definitions</p>"
@@ -32,18 +32,18 @@ void SprintView::refresh()
     auto settingsRow = content_->addWidget(std::make_unique<Wt::WContainerWidget>());
     settingsRow->setStyleClass("form-row-inline");
 
-    settingsRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Total Weeks:</span>"));
+    settingsRow->addWidget(ppc::xhtml("<span class=\"field-label\">Total Weeks:</span>"));
     auto weeksSpin = settingsRow->addWidget(std::make_unique<Wt::WSpinBox>());
     weeksSpin->setRange(2, 104);
     weeksSpin->setValue(data_.totalWeeks);
     weeksSpin->setStyleClass("input-field input-sm");
 
-    settingsRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-label\">Sprint Length:</span>"));
+    settingsRow->addWidget(ppc::xhtml("<span class=\"field-label\">Sprint Length:</span>"));
     auto sprintLenSpin = settingsRow->addWidget(std::make_unique<Wt::WSpinBox>());
     sprintLenSpin->setRange(1, 4);
     sprintLenSpin->setValue(data_.sprintLengthWeeks);
     sprintLenSpin->setStyleClass("input-field input-sm");
-    settingsRow->addWidget(std::make_unique<Wt::WText>("<span class=\"field-unit\">weeks</span>"));
+    settingsRow->addWidget(ppc::xhtml("<span class=\"field-unit\">weeks</span>"));
 
     auto regenBtn = settingsRow->addWidget(std::make_unique<Wt::WPushButton>("Regenerate Sprints"));
     regenBtn->setStyleClass("btn btn-primary");
@@ -55,8 +55,8 @@ void SprintView::refresh()
     });
 
     // ---- Agile Ceremonies ---------------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Agile Ceremonies</h3>"));
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Agile Ceremonies</h3>"));
+    content_->addWidget(ppc::xhtml(
         "<p class=\"view-subtitle\">These ceremonies occur every sprint and their hours are factored into project overhead.</p>"
     ));
 
@@ -77,9 +77,9 @@ void SprintView::refresh()
         int row = i + 1;
         totalCerHrs += cer.totalHoursPerSprint();
 
-        cerTable->elementAt(row, 0)->addWidget(std::make_unique<Wt::WText>(
+        cerTable->elementAt(row, 0)->addWidget(ppc::xhtml(
             "<strong>" + cer.name + "</strong>"));
-        cerTable->elementAt(row, 1)->addWidget(std::make_unique<Wt::WText>(
+        cerTable->elementAt(row, 1)->addWidget(ppc::xhtml(
             "<span class=\"text-muted\">" + cer.description + "</span>"));
         cerTable->elementAt(row, 1)->setStyleClass("cell-desc");
 
@@ -123,7 +123,7 @@ void SprintView::refresh()
         cerTable->elementAt(trow, i2)->addStyleClass("total-row");
 
     double totalCerPerProject = totalCerHrs * (double)data_.sprints.size();
-    content_->addWidget(std::make_unique<Wt::WText>(
+    content_->addWidget(ppc::xhtml(
         "<div class=\"info-callout\">"
         "<strong>Project Ceremony Overhead:</strong> " +
         ppc::formatNumber(totalCerHrs, 1) + " hrs/sprint &times; " +
@@ -133,7 +133,7 @@ void SprintView::refresh()
     ));
 
     // ---- Sprint board -------------------------------------------------------
-    content_->addWidget(std::make_unique<Wt::WText>("<h3 class=\"section-title\">Sprint Board</h3>"));
+    content_->addWidget(ppc::xhtml("<h3 class=\"section-title\">Sprint Board</h3>"));
 
     for (int si = 0; si < (int)data_.sprints.size(); si++) {
         auto& sprint = data_.sprints[si];
@@ -146,7 +146,7 @@ void SprintView::refresh()
                         sprint.status == "Completed" ? "approved" : "draft") +
             "\">" + sprint.status + "</span>";
 
-        sprintCard->addWidget(std::make_unique<Wt::WText>(
+        sprintCard->addWidget(ppc::xhtml(
             "<div class=\"sprint-header\">"
             "<div class=\"sprint-name\">" + sprint.name + " " + statusBadge + "</div>"
             "<div class=\"sprint-weeks\">Weeks " + std::to_string(sprint.startWeek) +
@@ -155,7 +155,7 @@ void SprintView::refresh()
         ));
 
         if (!sprint.goal.empty()) {
-            sprintCard->addWidget(std::make_unique<Wt::WText>(
+            sprintCard->addWidget(ppc::xhtml(
                 "<div class=\"sprint-goal\"><strong>Goal:</strong> " + sprint.goal + "</div>"
             ));
         }
@@ -170,7 +170,7 @@ void SprintView::refresh()
                     if (comp.id == cid) {
                         double hrs = comp.totalHours();
                         double cost = data_.componentCost(comp);
-                        compList->addWidget(std::make_unique<Wt::WText>(
+                        compList->addWidget(ppc::xhtml(
                             "<div class=\"sprint-comp-item\">"
                             "<span class=\"comp-name\">" + comp.name + "</span>"
                             "<span class=\"comp-hours\">" + ppc::formatNumber(hrs, 0) + " hrs</span>"
@@ -184,7 +184,7 @@ void SprintView::refresh()
         }
 
         // Ceremony summary for this sprint
-        sprintCard->addWidget(std::make_unique<Wt::WText>(
+        sprintCard->addWidget(ppc::xhtml(
             "<div class=\"sprint-ceremony-summary\">"
             "<span class=\"cer-label\">Ceremony overhead:</span> "
             "<span class=\"cer-hours\">" + ppc::formatNumber(totalCerHrs, 1) + " hrs/person</span>"

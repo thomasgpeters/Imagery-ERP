@@ -15,8 +15,18 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <Wt/WText.h>
 
 namespace ppc {
+
+// ---- XHTML WText helper ---------------------------------------------------
+// Wt::WText defaults to PlainText in some builds, so HTML content must
+// explicitly opt in to XHTML rendering.
+inline std::unique_ptr<Wt::WText> xhtml(const std::string& html) {
+    auto w = std::make_unique<Wt::WText>(html);
+    w->setTextFormat(Wt::TextFormat::XHTML);
+    return w;
+}
 
 // ---- Utility Formatters ----------------------------------------------------
 
