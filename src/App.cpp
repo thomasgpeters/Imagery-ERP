@@ -42,9 +42,16 @@ App::App(const Wt::WEnvironment& env)
 
 void App::buildLayout()
 {
+    // Ensure Wt's root container fills the viewport
+    root()->setStyleClass("wt-root");
+
     // App shell: row flex — sidebar (full height) | right column (topbar + workarea)
     appShell_ = root()->addWidget(std::make_unique<Wt::WContainerWidget>());
     appShell_->setStyleClass("app-shell theme-light");
+    // Belt-and-suspenders: set flex row via inline style so Wt can't override it
+    appShell_->setAttributeValue("style",
+        "display:flex !important;flex-direction:row !important;"
+        "height:100vh !important;width:100% !important;overflow:hidden !important;");
 
     // Sidebar — full height, left edge
     sidebar_ = appShell_->addWidget(std::make_unique<Wt::WContainerWidget>());
@@ -53,6 +60,9 @@ void App::buildLayout()
     // Right column: topbar + workarea
     auto mainColumn = appShell_->addWidget(std::make_unique<Wt::WContainerWidget>());
     mainColumn->setStyleClass("app-main");
+    mainColumn->setAttributeValue("style",
+        "display:flex !important;flex-direction:column !important;"
+        "flex:1 1 0% !important;min-width:0;overflow:hidden;height:100%;");
 
     topbar_ = mainColumn->addWidget(std::make_unique<Wt::WContainerWidget>());
     buildTopbar();
