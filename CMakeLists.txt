@@ -78,5 +78,8 @@ add_executable(project_planner
 target_include_directories(project_planner PRIVATE src)
 target_link_libraries(project_planner ${WT_LIBS} ${PDF_LIBS})
 
+# Suppress deprecation warnings from Wt headers (WLogger.h uses sprintf)
+target_compile_options(project_planner PRIVATE -Wno-deprecated-declarations)
+
 # Copy resources to build directory
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
