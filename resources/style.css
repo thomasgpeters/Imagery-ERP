@@ -280,35 +280,62 @@ body > div,
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     padding: 4px 0;
     z-index: 1000;
+    list-style: none !important;
+    margin: 0;
 }
-.user-dropdown .Wt-popupmenu-item {
+.user-dropdown ul {
+    list-style: none !important;
+    margin: 0;
+    padding: 0;
+}
+.user-dropdown li {
+    list-style: none !important;
+    margin: 0;
+    padding: 0;
+}
+.user-dropdown li::before,
+.user-dropdown li::marker {
+    content: none !important;
+    display: none !important;
+}
+.user-dropdown .Wt-popupmenu-item,
+.user-dropdown li > a,
+.user-dropdown li > span {
+    display: block;
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
+    text-decoration: none !important;
     cursor: pointer;
     transition: background 0.1s;
 }
-.user-dropdown .Wt-popupmenu-item:hover {
+.user-dropdown .Wt-popupmenu-item:hover,
+.user-dropdown li:hover > a,
+.user-dropdown li:hover > span {
     background: var(--bg-tertiary);
 }
-.user-dropdown .dropdown-header {
+.user-dropdown .dropdown-header,
+.user-dropdown .dropdown-header > a,
+.user-dropdown .dropdown-header > span {
     font-size: 10px !important;
     font-weight: 700 !important;
     color: var(--text-muted) !important;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    padding: 8px 16px 4px !important;
+    padding: 10px 16px 4px !important;
     cursor: default !important;
     background: transparent !important;
 }
 .user-dropdown .dropdown-header:hover {
     background: transparent !important;
 }
-.user-dropdown .Wt-popupmenu-separator {
+.user-dropdown .Wt-popupmenu-separator,
+.user-dropdown hr {
     height: 1px;
     background: var(--border-color);
     margin: 4px 0;
+    border: none;
 }
 
 /* ---- Sidebar (full-height, left edge) ------------------------------------ */
