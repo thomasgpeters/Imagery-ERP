@@ -65,7 +65,7 @@ void MaterialView::refresh()
 
         // Editable name
         auto nameEdit = table->elementAt(row, 0)->addWidget(std::make_unique<Wt::WLineEdit>(mat.name));
-        nameEdit->setStyleClass("input-field");
+        nameEdit->setStyleClass("input-field input-wide");
         int matIdx = m;
         nameEdit->changed().connect([this, matIdx, nameEdit]() {
             data_.materials[matIdx].name = nameEdit->text().toUTF8();

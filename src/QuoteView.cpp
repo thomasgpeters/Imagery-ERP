@@ -63,8 +63,8 @@ void QuoteView::refresh()
             "<div class=\"est-client\">"
             "<span class=\"field-label\">Client:</span> " + est.clientName +
             " (" + est.clientCompany + ")"
-            " &mdash; <span class=\"field-label\">Valid Until:</span> " + ppc::formatDate(est.validUntil) +
-            " &mdash; <span class=\"field-label\">Created:</span> " + ppc::formatDate(est.createdAt) +
+            " &#8212; <span class=\"field-label\">Valid Until:</span> " + ppc::formatDate(est.validUntil) +
+            " &#8212; <span class=\"field-label\">Created:</span> " + ppc::formatDate(est.createdAt) +
             "</div>"
         ));
 
@@ -141,7 +141,7 @@ void QuoteView::refresh()
                     "<div class=\"signature-block\">"
                     "<div class=\"sig-line\">" + sig.signatureData + "</div>"
                     "<div class=\"sig-details\">" + sig.signerName + ", " + sig.signerTitle +
-                    " &mdash; " + ppc::formatTimestamp(sig.signedAt) + "</div>"
+                    " &#8212; " + ppc::formatTimestamp(sig.signedAt) + "</div>"
                     "</div>"));
             }
         } else {

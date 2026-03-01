@@ -20,7 +20,7 @@ void DashboardView::refresh()
     // View title
     content_->addWidget(ppc::xhtml(
         "<h2 class=\"view-title\">Dashboard</h2>"
-        "<p class=\"view-subtitle\">" + data_.projectName + " &mdash; " + data_.clientName + "</p>"
+        "<p class=\"view-subtitle\">" + data_.projectName + " &#8212; " + data_.clientName + "</p>"
     ));
 
     // ---- Metric cards -------------------------------------------------------
@@ -71,7 +71,7 @@ void DashboardView::refresh()
 
         c = 0;
         roleTable->elementAt(row, c++)->addWidget(ppc::xhtml(
-            "<span class=\"role-icon\">&#128100;</span> " + role.name));
+            "<span class=\"role-icon\">&#9679;</span> " + role.name));
         roleTable->elementAt(row, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(role.baseRate)));
         roleTable->elementAt(row, c++)->setStyleClass("cell-right");
         roleTable->elementAt(row, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(role.overheadRate)));
@@ -186,7 +186,7 @@ void DashboardView::refresh()
 
             c = 0;
             matTable->elementAt(mrow, c++)->addWidget(ppc::xhtml(
-                "<span class=\"material-icon\">&#128230;</span> " + mat.name));
+                "<span class=\"material-icon\">&#9670;</span> " + mat.name));
             matTable->elementAt(mrow, c++)->addWidget(std::make_unique<Wt::WText>(mat.category));
             matTable->elementAt(mrow, c)->addWidget(std::make_unique<Wt::WText>(ppc::formatCurrency(mat.unitCost)));
             matTable->elementAt(mrow, c++)->setStyleClass("cell-right");

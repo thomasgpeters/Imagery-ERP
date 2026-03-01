@@ -63,7 +63,7 @@ void ResourceView::refresh()
 
         // Editable name
         auto nameEdit = table->elementAt(row, 0)->addWidget(std::make_unique<Wt::WLineEdit>(role.name));
-        nameEdit->setStyleClass("input-field");
+        nameEdit->setStyleClass("input-field input-wide");
         int roleIdx = r;
         nameEdit->changed().connect([this, roleIdx, nameEdit]() {
             data_.roles[roleIdx].name = nameEdit->text().toUTF8();

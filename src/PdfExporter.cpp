@@ -84,7 +84,7 @@ std::string PdfExporter::generateHtml(const ProjectData& data, const Estimate& e
                      << "<td><small>" << comp.statementOfWork << "</small></td>"
                      << "<td class='right'>" << formatNumber(h, 0) << "</td>"
                      << "<td class='right'>" << formatCurrency(labor) << "</td>"
-                     << "<td class='right'>" << (mat > 0 ? formatCurrency(mat) : "&mdash;") << "</td>"
+                     << "<td class='right'>" << (mat > 0 ? formatCurrency(mat) : "&#8212;") << "</td>"
                      << "<td class='right'>" << formatCurrency(c) << "</td>"
                      << "<td class='right'>" << formatCurrency(s) << "</td></tr>";
                 break;
