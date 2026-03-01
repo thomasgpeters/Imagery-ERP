@@ -565,25 +565,25 @@ public:
             {8, "Business Analyst",   "Business Analyst",              50.00, 12.00, true, 8},
         };
 
-        // Materials
+        // Materials (IDs 1-9, matching seed_data.sql)
         materials = {
-            {20, "Cloud Hosting (Monthly)",     "AWS/Azure compute & storage for dev/staging environments",
+            {1, "Cloud Hosting (Monthly)",     "AWS/Azure compute & storage for dev/staging environments",
              "Software/Licenses", "month",  2400.00, true, 1},
-            {21, "CI/CD Pipeline Licenses",     "GitHub Actions / Jenkins enterprise license fees",
+            {2, "CI/CD Pipeline Licenses",     "GitHub Actions / Jenkins enterprise license fees",
              "Software/Licenses", "month",   350.00, true, 2},
-            {22, "SSL Certificates",            "Wildcard SSL certs for staging and production",
+            {3, "SSL Certificates",            "Wildcard SSL certs for staging and production",
              "Software/Licenses", "unit",    250.00, true, 3},
-            {23, "Monitoring & APM Tools",      "Datadog / New Relic APM license for project duration",
+            {4, "Monitoring & APM Tools",      "Datadog / New Relic APM license for project duration",
              "Software/Licenses", "month",   450.00, true, 4},
-            {24, "UX Research Incentives",      "Gift cards / compensation for usability test participants",
+            {5, "UX Research Incentives",      "Gift cards / compensation for usability test participants",
              "Other",             "unit",     50.00, true, 5},
-            {25, "Team Travel — On-site Kick-off", "Round-trip airfare + hotel for 3-day on-site workshop",
+            {6, "Team Travel — On-site Kick-off", "Round-trip airfare + hotel for 3-day on-site workshop",
              "Travel",            "trip",   1800.00, true, 6},
-            {26, "Printing & Documentation",    "Bound project deliverables, training manuals",
+            {7, "Printing & Documentation",    "Bound project deliverables, training manuals",
              "Office Supplies",   "lot",     180.00, true, 7},
-            {27, "Security Pen-Test Service",   "Third-party penetration testing engagement",
+            {8, "Security Pen-Test Service",   "Third-party penetration testing engagement",
              "Other",             "unit",   4500.00, true, 8},
-            {28, "Load Testing Platform",       "Blazemeter / k6 cloud for performance testing",
+            {9, "Load Testing Platform",       "Blazemeter / k6 cloud for performance testing",
              "Software/Licenses", "month",   600.00, true, 9},
         };
 
@@ -640,7 +640,7 @@ public:
              "Conduct up to 8 structured interviews (60-90 min each) with executive sponsors, department heads, and end-user representatives. Deliverables include interview summaries, consolidated requirements document, and stakeholder map.",
              "Medium", "Approved", 1,
              {{1, 16, ""}, {5, 20, ""}, {8, 24, ""}},
-             {{25, 2, "Kick-off + mid-project on-site visits"}, {26, 1, "Printed interview guides"}}},
+             {{6, 2, "Kick-off + mid-project on-site visits"}, {7, 1, "Printed interview guides"}}},
 
             {2, 1, 1, "Current-State Assessment", "Analyze existing systems, integrations, and pain points.",
              "Perform a comprehensive audit of the current portal: technology stack, integrations, performance baselines, security posture, and user analytics. Deliver a Current-State Assessment Report with gap analysis and risk register.",
@@ -656,13 +656,13 @@ public:
              "Conduct user research (surveys, card sorting, task analysis) with up to 15 participants. Produce 3 user personas, 2 journey maps, and low/mid-fidelity wireframes for all primary workflows. Two rounds of revision included.",
              "High", "Approved", 4,
              {{6, 60, ""}, {8, 16, ""}, {5, 8, ""}},
-             {{24, 15, "Incentives for 15 usability test participants"}}},
+             {{5, 15, "Incentives for 15 usability test participants"}}},
 
             {5, 1, 2, "System Architecture Design", "Design the target-state system architecture.",
              "Design microservices architecture including service decomposition, API contracts (OpenAPI 3.0), data model (ERD), event-driven patterns, security architecture, and infrastructure topology. Deliver ADRs and Technical Design Document.",
              "Critical", "Approved", 5,
              {{1, 60, ""}, {3, 24, ""}, {7, 16, ""}},
-             {{20, 3, "Dev/staging cloud hosting during design phase"}, {21, 3, "CI/CD pipeline setup"}}},
+             {{1, 3, "Dev/staging cloud hosting during design phase"}, {2, 3, "CI/CD pipeline setup"}}},
 
             {6, 1, 2, "UI Prototype", "High-fidelity interactive prototype.",
              "Create high-fidelity interactive prototype covering the top 5 user workflows. Include design system components, responsive layouts (desktop + tablet), and accessibility compliance review (WCAG 2.1 AA). One round of usability testing included.",
@@ -673,7 +673,7 @@ public:
              "Implement OAuth 2.0/OIDC authentication with SSO integration. Build RBAC with configurable permission sets. Implement MFA (TOTP + SMS). Includes session management, token refresh, and audit logging.",
              "Critical", "Estimated", 7,
              {{3, 60, ""}, {2, 40, ""}, {1, 12, ""}, {4, 20, ""}},
-             {{22, 2, "Wildcard SSL certs for staging + prod"}, {20, 3, "Cloud hosting during development"}}},
+             {{3, 2, "Wildcard SSL certs for staging + prod"}, {1, 3, "Cloud hosting during development"}}},
 
             {8, 1, 3, "Dashboard & Analytics Module", "Real-time dashboards with configurable widgets.",
              "Build configurable dashboard framework with drag-and-drop widget layout. Implement 8 standard widget types. Data sourced from analytics API with 30-second refresh intervals.",
@@ -689,7 +689,7 @@ public:
              "Deploy API gateway with rate limiting, request/response transformation, API key management. Build integration adapters for 3 third-party systems. Include retry logic, circuit breakers, and dead-letter queues.",
              "Critical", "Estimated", 10,
              {{1, 20, ""}, {3, 48, ""}, {2, 32, ""}, {7, 24, ""}, {4, 16, ""}},
-             {{23, 4, "APM monitoring during integration testing"}}},
+             {{4, 4, "APM monitoring during integration testing"}}},
 
             {11, 1, 3, "Notification & Messaging Service", "Email, SMS, in-app, and push notifications.",
              "Build multi-channel notification service supporting email, SMS, in-app, and push notifications. Include templates, user preferences, delivery tracking, and retry mechanisms.",
@@ -705,19 +705,19 @@ public:
              "Conduct performance testing (500 concurrent users), stress testing, endurance testing. Perform OWASP Top 10 scan, dependency audit, penetration testing. Deliver performance benchmarks and security findings.",
              "Critical", "Estimated", 13,
              {{4, 40, ""}, {7, 24, ""}, {3, 16, ""}, {1, 12, ""}},
-             {{27, 1, "Third-party pen test engagement"}, {28, 2, "Load testing cloud platform"}}},
+             {{8, 1, "Third-party pen test engagement"}, {9, 2, "Load testing cloud platform"}}},
 
             {14, 1, 5, "Production Deployment & Migration", "Infrastructure, deployment, data migration.",
              "Provision production infrastructure (IaC via Terraform). Execute blue-green deployment with rollback. Perform data migration with validation. Deliver runbook, monitoring dashboards, and alert configuration.",
              "Critical", "Estimated", 14,
              {{7, 48, ""}, {3, 24, ""}, {1, 12, ""}, {2, 16, ""}, {4, 16, ""}},
-             {{20, 3, "Production cloud hosting setup"}, {23, 3, "Monitoring + APM for production"}}},
+             {{1, 3, "Production cloud hosting setup"}, {4, 3, "Monitoring + APM for production"}}},
 
             {15, 1, 5, "Training & Documentation", "User training, admin training, technical documentation.",
              "Develop training materials: end-user guide, admin guide, API documentation. Conduct 3 end-user sessions, 2 admin sessions, 1 technical handoff. Deliver recorded sessions and knowledge base articles.",
              "Medium", "Estimated", 15,
              {{5, 32, ""}, {8, 40, ""}, {2, 12, ""}, {6, 8, ""}},
-             {{26, 3, "Printed training manuals and handoff binders"}}},
+             {{7, 3, "Printed training manuals and handoff binders"}}},
         };
 
         // Generate sprints

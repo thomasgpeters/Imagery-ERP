@@ -194,7 +194,36 @@ COMMENT ON TABLE component IS 'Estimable unit of work with its own Statement of 
 COMMENT ON COLUMN component.statement_of_work IS 'Full Statement of Work text for this component';
 
 -- =============================================================================
--- 8. COMPONENT_RESOURCE  (man-hours needed per role for a component)
+-- 8. MATERIAL  (non-labor cost items: supplies, licenses, equipment, travel)
+-- =============================================================================
+CREATE TABLE material (
+    id              SERIAL PRIMARY KEY,
+    company_id      INTEGER NOT NULL REFERENCES company(id) ON DELETE CASCADE,
+    name            VARCHAR(200) NOT NULL,
+    description     TEXT,
+    category        VARCHAR(50) NOT NULL DEFAULT 'Other'
+                        CHECK (category IN ('Office Supplies','Construction',
+                                            'Equipment/Tools','Travel',
+                                            'Software/Licenses','Other')),
+    unit            VARCHAR(30) NOT NULL DEFAULT 'unit',
+    unit_cost       NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    is_active       BOOLEAN DEFAULT TRUE,
+    sort_order      INTEGER DEFAULT 0,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(company_id, name)
+);
+
+CREATE INDEX idx_material_company  ON material(company_id);
+CREATE INDEX idx_material_category ON material(category);
+
+COMMENT ON TABLE material IS 'Non-labor cost items (office supplies, software licenses, equipment, travel, etc.)';
+COMMENT ON COLUMN material.category IS 'Material type: Office Supplies, Construction, Equipment/Tools, Travel, Software/Licenses, Other';
+COMMENT ON COLUMN material.unit IS 'Unit of measure: unit, ton, bag, day, mile, license, lot, month, trip';
+COMMENT ON COLUMN material.unit_cost IS 'Cost per unit of this material';
+
+-- =============================================================================
+-- 9. COMPONENT_RESOURCE  (man-hours needed per role for a component)
 -- =============================================================================
 CREATE TABLE component_resource (
     id              SERIAL PRIMARY KEY,
@@ -213,7 +242,26 @@ CREATE INDEX idx_comp_resource_role      ON component_resource(role_id);
 COMMENT ON TABLE component_resource IS 'Resource requirements per component — hours needed per role';
 
 -- =============================================================================
--- 9. AGILE CEREMONY DEFINITIONS
+-- 10. COMPONENT_MATERIAL  (non-labor materials needed per component)
+-- =============================================================================
+CREATE TABLE component_material (
+    id              SERIAL PRIMARY KEY,
+    component_id    INTEGER NOT NULL REFERENCES component(id) ON DELETE CASCADE,
+    material_id     INTEGER NOT NULL REFERENCES material(id) ON DELETE RESTRICT,
+    quantity        NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    notes           TEXT,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(component_id, material_id)
+);
+
+CREATE INDEX idx_comp_material_component ON component_material(component_id);
+CREATE INDEX idx_comp_material_material  ON component_material(material_id);
+
+COMMENT ON TABLE component_material IS 'Material requirements per component — quantity of each material needed';
+
+-- =============================================================================
+-- 11. AGILE CEREMONY DEFINITIONS
 -- =============================================================================
 CREATE TABLE agile_ceremony (
     id                      SERIAL PRIMARY KEY,
@@ -236,7 +284,7 @@ COMMENT ON COLUMN agile_ceremony.duration_hours IS 'Duration in hours per occurr
 COMMENT ON COLUMN agile_ceremony.occurrences_per_sprint IS 'Number of times this ceremony occurs each sprint';
 
 -- =============================================================================
--- 10. SPRINT  (2-week iteration)
+-- 12. SPRINT  (2-week iteration)
 -- =============================================================================
 CREATE TABLE sprint (
     id              SERIAL PRIMARY KEY,
@@ -263,7 +311,7 @@ CREATE INDEX idx_sprint_project ON sprint(project_id);
 COMMENT ON TABLE sprint IS 'Sprint / iteration (default 2-week intervals)';
 
 -- =============================================================================
--- 11. SPRINT_COMPONENT  (components/stories assigned to a sprint)
+-- 13. SPRINT_COMPONENT  (components/stories assigned to a sprint)
 -- =============================================================================
 CREATE TABLE sprint_component (
     id              SERIAL PRIMARY KEY,
@@ -283,7 +331,7 @@ CREATE INDEX idx_sprint_comp_component ON sprint_component(component_id);
 COMMENT ON TABLE sprint_component IS 'Many-to-many: components assigned to sprints (sprint backlog)';
 
 -- =============================================================================
--- 12. SPRINT_CEREMONY  (ceremony instances per sprint with actual tracking)
+-- 14. SPRINT_CEREMONY  (ceremony instances per sprint with actual tracking)
 -- =============================================================================
 CREATE TABLE sprint_ceremony (
     id              SERIAL PRIMARY KEY,
@@ -303,7 +351,7 @@ CREATE INDEX idx_sprint_ceremony_sprint ON sprint_ceremony(sprint_id);
 COMMENT ON TABLE sprint_ceremony IS 'Ceremony instances per sprint with scheduling and actual duration tracking';
 
 -- =============================================================================
--- 13. WEEK_ALLOCATION  (hours allocated per role per week — the planning grid)
+-- 15. WEEK_ALLOCATION  (hours allocated per role per week — the planning grid)
 -- =============================================================================
 CREATE TABLE week_allocation (
     id              SERIAL PRIMARY KEY,
@@ -330,7 +378,7 @@ COMMENT ON COLUMN week_allocation.allocated_hours IS 'Planned/estimated hours fo
 COMMENT ON COLUMN week_allocation.actual_hours IS 'Actual hours tracked (NULL until reported)';
 
 -- =============================================================================
--- 14. ESTIMATE  (assembled project estimate / proposal)
+-- 16. ESTIMATE  (assembled project estimate / proposal)
 -- =============================================================================
 CREATE TABLE estimate (
     id              SERIAL PRIMARY KEY,
@@ -370,7 +418,7 @@ COMMENT ON COLUMN estimate.shared_link_token IS 'Unique token for online estimat
 COMMENT ON COLUMN estimate.estimate_number IS 'Human-readable estimate number (e.g., EST-2026-0001)';
 
 -- =============================================================================
--- 15. ESTIMATE_COMPONENT  (components included in an estimate)
+-- 17. ESTIMATE_COMPONENT  (components included in an estimate)
 -- =============================================================================
 CREATE TABLE estimate_component (
     id              SERIAL PRIMARY KEY,
@@ -390,7 +438,7 @@ CREATE INDEX idx_est_comp_component ON estimate_component(component_id);
 COMMENT ON TABLE estimate_component IS 'Components included in a specific estimate with optional overrides';
 
 -- =============================================================================
--- 16. ESTIMATE_PHASE_SUMMARY  (phase-level pricing in the estimate)
+-- 18. ESTIMATE_PHASE_SUMMARY  (phase-level pricing in the estimate)
 -- =============================================================================
 CREATE TABLE estimate_phase_summary (
     id              SERIAL PRIMARY KEY,
@@ -409,7 +457,7 @@ CREATE INDEX idx_est_phase_estimate ON estimate_phase_summary(estimate_id);
 COMMENT ON TABLE estimate_phase_summary IS 'Cached phase-level cost and sell price summaries for an estimate';
 
 -- =============================================================================
--- 17. ESTIMATE_ROLE_SUMMARY  (role-level pricing in the estimate)
+-- 19. ESTIMATE_ROLE_SUMMARY  (role-level pricing in the estimate)
 -- =============================================================================
 CREATE TABLE estimate_role_summary (
     id              SERIAL PRIMARY KEY,
@@ -429,7 +477,7 @@ CREATE INDEX idx_est_role_estimate ON estimate_role_summary(estimate_id);
 COMMENT ON TABLE estimate_role_summary IS 'Role-level cost and sell price summaries for an estimate';
 
 -- =============================================================================
--- 18. E-SIGNATURE
+-- 20. E-SIGNATURE
 -- =============================================================================
 CREATE TABLE e_signature (
     id              SERIAL PRIMARY KEY,
@@ -454,7 +502,7 @@ COMMENT ON TABLE e_signature IS 'Electronic signatures captured on estimates';
 COMMENT ON COLUMN e_signature.signature_data IS 'Base64-encoded signature image (drawn), typed name, or uploaded file reference';
 
 -- =============================================================================
--- 19. CHANGE ORDER
+-- 21. CHANGE ORDER
 -- =============================================================================
 CREATE TABLE change_order (
     id              SERIAL PRIMARY KEY,
@@ -491,7 +539,7 @@ CREATE INDEX idx_co_status   ON change_order(status);
 COMMENT ON TABLE change_order IS 'Change orders that modify scope, cost, or schedule of an approved estimate';
 
 -- =============================================================================
--- 20. CHANGE_ORDER_ITEM  (line items within a change order)
+-- 22. CHANGE_ORDER_ITEM  (line items within a change order)
 -- =============================================================================
 CREATE TABLE change_order_item (
     id              SERIAL PRIMARY KEY,
@@ -512,7 +560,7 @@ CREATE INDEX idx_co_item_co ON change_order_item(change_order_id);
 COMMENT ON TABLE change_order_item IS 'Individual line-item changes within a change order';
 
 -- =============================================================================
--- 21. CHANGE ORDER SIGNATURE  (approvals on change orders)
+-- 23. CHANGE ORDER SIGNATURE  (approvals on change orders)
 -- =============================================================================
 CREATE TABLE change_order_signature (
     id              SERIAL PRIMARY KEY,
@@ -533,7 +581,7 @@ CREATE INDEX idx_co_sig_co ON change_order_signature(change_order_id);
 COMMENT ON TABLE change_order_signature IS 'E-signatures on change order approvals';
 
 -- =============================================================================
--- 22. EMAIL LOG  (track sent estimate/quote emails)
+-- 24. EMAIL LOG  (track sent estimate/quote emails)
 -- =============================================================================
 CREATE TABLE email_log (
     id              SERIAL PRIMARY KEY,
@@ -557,7 +605,7 @@ CREATE INDEX idx_email_co       ON email_log(change_order_id);
 COMMENT ON TABLE email_log IS 'Audit log of emails sent for estimates and change orders';
 
 -- =============================================================================
--- 23. AUDIT LOG  (general activity tracking)
+-- 25. AUDIT LOG  (general activity tracking)
 -- =============================================================================
 CREATE TABLE audit_log (
     id              SERIAL PRIMARY KEY,
@@ -598,22 +646,59 @@ FROM role r;
 
 COMMENT ON VIEW v_role_rates IS 'Roles with computed fully loaded rate (base + overhead)';
 
--- Component cost summary view
+-- Component cost summary view (labor + material)
 CREATE OR REPLACE VIEW v_component_cost AS
 SELECT
     c.id AS component_id,
     c.project_id,
     c.name AS component_name,
     c.phase_id,
-    COALESCE(SUM(cr.estimated_hours), 0) AS total_hours,
-    COALESCE(SUM(cr.estimated_hours * (r.base_rate + r.overhead_rate)), 0) AS total_cost,
-    COUNT(DISTINCT cr.role_id) AS role_count
+    COALESCE(labor.total_hours, 0) AS total_hours,
+    COALESCE(labor.labor_cost, 0) AS labor_cost,
+    COALESCE(mat.material_cost, 0) AS material_cost,
+    COALESCE(labor.labor_cost, 0) + COALESCE(mat.material_cost, 0) AS total_cost,
+    COALESCE(labor.role_count, 0) AS role_count,
+    COALESCE(mat.material_count, 0) AS material_count
 FROM component c
-LEFT JOIN component_resource cr ON cr.component_id = c.id
-LEFT JOIN role r ON r.id = cr.role_id
-GROUP BY c.id, c.project_id, c.name, c.phase_id;
+LEFT JOIN (
+    SELECT cr.component_id,
+           SUM(cr.estimated_hours) AS total_hours,
+           SUM(cr.estimated_hours * (r.base_rate + r.overhead_rate)) AS labor_cost,
+           COUNT(DISTINCT cr.role_id) AS role_count
+    FROM component_resource cr
+    JOIN role r ON r.id = cr.role_id
+    GROUP BY cr.component_id
+) labor ON labor.component_id = c.id
+LEFT JOIN (
+    SELECT cm.component_id,
+           SUM(cm.quantity * m.unit_cost) AS material_cost,
+           COUNT(DISTINCT cm.material_id) AS material_count
+    FROM component_material cm
+    JOIN material m ON m.id = cm.material_id
+    GROUP BY cm.component_id
+) mat ON mat.component_id = c.id;
 
-COMMENT ON VIEW v_component_cost IS 'Component-level cost summary with total hours and fully loaded cost';
+COMMENT ON VIEW v_component_cost IS 'Component-level cost summary with labor hours, labor cost, material cost, and combined total';
+
+-- Material usage summary view
+CREATE OR REPLACE VIEW v_material_summary AS
+SELECT
+    m.id AS material_id,
+    m.company_id,
+    m.name AS material_name,
+    m.category,
+    m.unit,
+    m.unit_cost,
+    COALESCE(SUM(cm.quantity), 0) AS total_quantity,
+    COALESCE(SUM(cm.quantity * m.unit_cost), 0) AS total_cost,
+    COUNT(DISTINCT cm.component_id) AS component_count
+FROM material m
+LEFT JOIN component_material cm ON cm.material_id = m.id
+WHERE m.is_active = TRUE
+GROUP BY m.id, m.company_id, m.name, m.category, m.unit, m.unit_cost
+ORDER BY m.sort_order;
+
+COMMENT ON VIEW v_material_summary IS 'Material usage aggregated across all components with total quantity and cost';
 
 -- Weekly cost grid view (the "Fully Loaded Costs" table)
 CREATE OR REPLACE VIEW v_weekly_cost_grid AS
@@ -649,31 +734,47 @@ ORDER BY wa.project_id, r.name;
 
 COMMENT ON VIEW v_project_role_summary IS 'Per-role hours and cost totals for each project';
 
--- Project total summary
+-- Project total summary (labor + materials)
 CREATE OR REPLACE VIEW v_project_summary AS
 SELECT
     p.id AS project_id,
     p.name AS project_name,
     p.markup_pct,
-    COALESCE(SUM(wa.allocated_hours), 0) AS total_hours,
-    COALESCE(SUM(wa.allocated_hours * (r.base_rate + r.overhead_rate)), 0) AS total_cost,
-    COALESCE(SUM(wa.allocated_hours * (r.base_rate + r.overhead_rate)), 0)
+    COALESCE(labor.total_hours, 0) AS total_hours,
+    COALESCE(labor.labor_cost, 0) AS labor_cost,
+    COALESCE(mat.material_cost, 0) AS material_cost,
+    COALESCE(labor.labor_cost, 0) + COALESCE(mat.material_cost, 0) AS total_cost,
+    (COALESCE(labor.labor_cost, 0) + COALESCE(mat.material_cost, 0))
         * (1 + p.markup_pct / 100.0) AS total_sell,
-    COALESCE(SUM(wa.allocated_hours * (r.base_rate + r.overhead_rate)), 0)
+    (COALESCE(labor.labor_cost, 0) + COALESCE(mat.material_cost, 0))
         * (p.markup_pct / 100.0) AS margin_amount,
-    CASE WHEN SUM(wa.allocated_hours) > 0
-         THEN SUM(wa.allocated_hours * (r.base_rate + r.overhead_rate)) / SUM(wa.allocated_hours)
+    CASE WHEN COALESCE(labor.total_hours, 0) > 0
+         THEN labor.labor_cost / labor.total_hours
          ELSE 0 END AS blended_cost_rate,
-    CASE WHEN SUM(wa.allocated_hours) > 0
-         THEN (SUM(wa.allocated_hours * (r.base_rate + r.overhead_rate)) / SUM(wa.allocated_hours))
-              * (1 + p.markup_pct / 100.0)
+    CASE WHEN COALESCE(labor.total_hours, 0) > 0
+         THEN (labor.labor_cost / labor.total_hours) * (1 + p.markup_pct / 100.0)
          ELSE 0 END AS blended_sell_rate
 FROM project p
-LEFT JOIN week_allocation wa ON wa.project_id = p.id
-LEFT JOIN role r ON r.id = wa.role_id
-GROUP BY p.id, p.name, p.markup_pct;
+LEFT JOIN (
+    SELECT wa.project_id,
+           SUM(wa.allocated_hours) AS total_hours,
+           SUM(wa.allocated_hours * (r.base_rate + r.overhead_rate)) AS labor_cost
+    FROM week_allocation wa
+    JOIN role r ON r.id = wa.role_id
+    GROUP BY wa.project_id
+) labor ON labor.project_id = p.id
+LEFT JOIN (
+    SELECT c.project_id,
+           SUM(cm.quantity * m.unit_cost) AS material_cost
+    FROM component c
+    JOIN component_material cm ON cm.component_id = c.id
+    JOIN material m ON m.id = cm.material_id
+    GROUP BY c.project_id
+) mat ON mat.project_id = p.id
+GROUP BY p.id, p.name, p.markup_pct,
+         labor.total_hours, labor.labor_cost, mat.material_cost;
 
-COMMENT ON VIEW v_project_summary IS 'Project-level totals: hours, cost, sell, margin, blended rates';
+COMMENT ON VIEW v_project_summary IS 'Project-level totals: hours, labor cost, material cost, combined cost/sell, margin, blended rates';
 
 -- Phase cost summary (for phased pricing)
 CREATE OR REPLACE VIEW v_phase_cost AS
@@ -805,7 +906,7 @@ $$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION generate_sprints IS 'Auto-generate sprints (2-week intervals) for a project and attach all active ceremonies';
 
--- Recalculate estimate totals from components
+-- Recalculate estimate totals from components (labor + materials)
 CREATE OR REPLACE FUNCTION recalculate_estimate(p_estimate_id INTEGER)
 RETURNS VOID AS $$
 DECLARE
@@ -826,18 +927,31 @@ BEGIN
         updated_at = NOW()
     FROM (
         SELECT
-            COALESCE(SUM(cr.estimated_hours), 0) AS total_hours,
-            COALESCE(SUM(cr.estimated_hours * (r.base_rate + r.overhead_rate)), 0) AS total_cost
-        FROM estimate_component ec
-        JOIN component_resource cr ON cr.component_id = ec.component_id
-        JOIN role r ON r.id = cr.role_id
-        WHERE ec.estimate_id = p_estimate_id AND ec.included = TRUE
+            COALESCE(labor.total_hours, 0) AS total_hours,
+            COALESCE(labor.labor_cost, 0) + COALESCE(mat.material_cost, 0) AS total_cost
+        FROM (
+            SELECT
+                SUM(cr.estimated_hours) AS total_hours,
+                SUM(cr.estimated_hours * (r.base_rate + r.overhead_rate)) AS labor_cost
+            FROM estimate_component ec
+            JOIN component_resource cr ON cr.component_id = ec.component_id
+            JOIN role r ON r.id = cr.role_id
+            WHERE ec.estimate_id = p_estimate_id AND ec.included = TRUE
+        ) labor,
+        (
+            SELECT
+                SUM(cm.quantity * m.unit_cost) AS material_cost
+            FROM estimate_component ec
+            JOIN component_material cm ON cm.component_id = ec.component_id
+            JOIN material m ON m.id = cm.material_id
+            WHERE ec.estimate_id = p_estimate_id AND ec.included = TRUE
+        ) mat
     ) sub
     WHERE estimate.id = p_estimate_id;
 END;
 $$ LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION recalculate_estimate IS 'Recalculate estimate totals from included components and their resource costs';
+COMMENT ON FUNCTION recalculate_estimate IS 'Recalculate estimate totals from included components (labor hours + material costs)';
 
 -- Generate estimate number
 CREATE OR REPLACE FUNCTION generate_estimate_number(p_company_id INTEGER)
@@ -891,6 +1005,8 @@ CREATE TRIGGER trg_project_updated    BEFORE UPDATE ON project    FOR EACH ROW E
 CREATE TRIGGER trg_phase_updated      BEFORE UPDATE ON phase      FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_component_updated  BEFORE UPDATE ON component  FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_comp_res_updated   BEFORE UPDATE ON component_resource FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+CREATE TRIGGER trg_material_updated   BEFORE UPDATE ON material           FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+CREATE TRIGGER trg_comp_mat_updated   BEFORE UPDATE ON component_material FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_ceremony_updated   BEFORE UPDATE ON agile_ceremony     FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_sprint_updated     BEFORE UPDATE ON sprint     FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 CREATE TRIGGER trg_week_alloc_updated BEFORE UPDATE ON week_allocation    FOR EACH ROW EXECUTE FUNCTION update_timestamp();
