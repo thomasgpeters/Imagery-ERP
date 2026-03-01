@@ -1,5 +1,6 @@
 // =============================================================================
 // App.cpp — Main application with branded sidebar, topnav, workarea, theme toggle
+//           and role-based navigation (Planning vs Execution)
 // =============================================================================
 
 #include "App.h"
@@ -71,6 +72,7 @@ void App::buildLayout()
     workarea_->setStyleClass("app-workarea");
 
     // Create all views (hidden by default — showView reveals one at a time)
+    // Fixed order: 0=Dashboard, 1=Roles, 2=Components, 3=Sprints, 4=Costing, 5=Quote, 6=ChangeOrders
     auto dv  = std::make_unique<DashboardView>(data_);   dashboardView_   = dv.get();
     auto rv  = std::make_unique<ResourceView>(data_);    resourceView_    = rv.get();
     auto cv  = std::make_unique<ComponentView>(data_);   componentView_   = cv.get();
@@ -171,38 +173,29 @@ void App::buildSidebar()
     // ── Separator ──
     sidebar_->addWidget(ppc::xhtml("<div class=\"sidebar-sep\"></div>"));
 
-    // ── Navigation — Group 1: Overview ──
-    auto nav = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
-    nav->setStyleClass("sidebar-nav");
+    // ── Role switcher ──
+    auto roleSwitcher = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
+    roleSwitcher->setStyleClass("role-switcher");
 
-    struct NavItem { std::string icon; std::string label; int sepAfter; };
-    std::vector<NavItem> navItems = {
-        {"&#9632;", "Dashboard",             1},  // separator after Dashboard
-        {"&#9881;", "Roles &amp; Rates",     0},
-        {"&#9638;", "Components &amp; SoW",  0},
-        {"&#9654;", "Sprints &amp; Agile",   1},  // separator after planning group
-        {"&#9733;", "Cost Analysis",         0},
-        {"&#9830;", "Quote Builder",         0},
-        {"&#8635;", "Change Orders",         0},
-    };
+    planningRoleBtn_ = roleSwitcher->addWidget(std::make_unique<Wt::WPushButton>());
+    planningRoleBtn_->setTextFormat(Wt::TextFormat::XHTML);
+    planningRoleBtn_->setText("Planning");
+    planningRoleBtn_->setStyleClass("role-btn active");
+    planningRoleBtn_->clicked().connect([this]() { switchRole(AppRole::Planning); });
 
-    for (int i = 0; i < (int)navItems.size(); i++) {
-        auto btn = nav->addWidget(std::make_unique<Wt::WPushButton>());
-        btn->setTextFormat(Wt::TextFormat::XHTML);
-        btn->setText(
-            "<span class=\"nav-icon\">" + navItems[i].icon + "</span>"
-            "<span class=\"nav-label\">" + navItems[i].label + "</span>"
-        );
-        btn->setStyleClass("sidebar-nav-btn");
-        int idx = i;
-        btn->clicked().connect([this, idx]() { showView(idx); });
-        navButtons_.push_back(btn);
+    executionRoleBtn_ = roleSwitcher->addWidget(std::make_unique<Wt::WPushButton>());
+    executionRoleBtn_->setTextFormat(Wt::TextFormat::XHTML);
+    executionRoleBtn_->setText("Execution");
+    executionRoleBtn_->setStyleClass("role-btn");
+    executionRoleBtn_->clicked().connect([this]() { switchRole(AppRole::Execution); });
 
-        // Add separator after this item if flagged
-        if (navItems[i].sepAfter) {
-            nav->addWidget(ppc::xhtml("<div class=\"sidebar-nav-sep\"></div>"));
-        }
-    }
+    // ── Separator ──
+    sidebar_->addWidget(ppc::xhtml("<div class=\"sidebar-sep\"></div>"));
+
+    // ── Navigation container (rebuilt on role switch) ──
+    navContainer_ = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
+    navContainer_->setStyleClass("sidebar-nav");
+    buildNavForRole();
 
     // ── Sidebar footer: Settings + Version ──
     auto footer = sidebar_->addWidget(std::make_unique<Wt::WContainerWidget>());
@@ -224,9 +217,75 @@ void App::buildSidebar()
     ));
 }
 
-void App::showView(int index)
+// Build navigation items based on current role
+void App::buildNavForRole()
 {
-    if (index < 0 || index > 6) return;
+    navContainer_->clear();
+    navButtons_.clear();
+    navViewMap_.clear();
+
+    struct NavItem { std::string icon; std::string label; int viewIndex; bool sepAfter; };
+    std::vector<NavItem> items;
+
+    if (activeRole_ == AppRole::Planning) {
+        items = {
+            {"&#9632;", "Dashboard",            0, true},
+            {"&#9881;", "Roles &amp; Rates",    1, false},
+            {"&#9638;", "Components &amp; SoW", 2, true},
+            {"&#9733;", "Cost Analysis",        4, false},
+            {"&#9830;", "Quote Builder",        5, false},
+        };
+    } else {
+        items = {
+            {"&#9632;", "Dashboard",            0, true},
+            {"&#9654;", "Sprints &amp; Agile",  3, false},
+            {"&#8635;", "Change Orders",        6, false},
+        };
+    }
+
+    for (int i = 0; i < (int)items.size(); i++) {
+        auto btn = navContainer_->addWidget(std::make_unique<Wt::WPushButton>());
+        btn->setTextFormat(Wt::TextFormat::XHTML);
+        btn->setText(
+            "<span class=\"nav-icon\">" + items[i].icon + "</span>"
+            "<span class=\"nav-label\">" + items[i].label + "</span>"
+        );
+        btn->setStyleClass("sidebar-nav-btn");
+        int viewIdx = items[i].viewIndex;
+        btn->clicked().connect([this, viewIdx]() { showView(viewIdx); });
+        navButtons_.push_back(btn);
+        navViewMap_.push_back(viewIdx);
+
+        if (items[i].sepAfter) {
+            navContainer_->addWidget(ppc::xhtml("<div class=\"sidebar-nav-sep\"></div>"));
+        }
+    }
+}
+
+void App::switchRole(AppRole role)
+{
+    if (role == activeRole_) return;
+    activeRole_ = role;
+
+    // Update role switcher button styles
+    if (role == AppRole::Planning) {
+        planningRoleBtn_->setStyleClass("role-btn active");
+        executionRoleBtn_->setStyleClass("role-btn");
+    } else {
+        planningRoleBtn_->setStyleClass("role-btn");
+        executionRoleBtn_->setStyleClass("role-btn active");
+    }
+
+    // Rebuild navigation for new role
+    buildNavForRole();
+
+    // Show Dashboard (always index 0 in workarea)
+    showView(0);
+}
+
+void App::showView(int viewIndex)
+{
+    if (viewIndex < 0 || viewIndex > 6) return;
 
     // Hide all views
     for (int i = 0; i < workarea_->count(); i++) {
@@ -234,19 +293,40 @@ void App::showView(int index)
     }
 
     // Show selected view
-    workarea_->widget(index)->setHidden(false);
-    activeNavIndex_ = index;
-    setNavActive(index);
-    refreshCurrentView();
+    workarea_->widget(viewIndex)->setHidden(false);
+    activeNavIndex_ = viewIndex;
+
+    // Highlight the nav button that maps to this view
+    for (int i = 0; i < (int)navViewMap_.size(); i++) {
+        if (navViewMap_[i] == viewIndex) {
+            setNavActive(i);
+            break;
+        }
+    }
+
+    refreshView(viewIndex);
 }
 
-void App::setNavActive(int index)
+void App::setNavActive(int navIdx)
 {
     for (int i = 0; i < (int)navButtons_.size(); i++) {
-        if (i == index)
+        if (i == navIdx)
             navButtons_[i]->setStyleClass("sidebar-nav-btn active");
         else
             navButtons_[i]->setStyleClass("sidebar-nav-btn");
+    }
+}
+
+void App::refreshView(int viewIndex)
+{
+    switch (viewIndex) {
+        case 0: dashboardView_->refresh();   break;
+        case 1: resourceView_->refresh();    break;
+        case 2: componentView_->refresh();   break;
+        case 3: sprintView_->refresh();      break;
+        case 4: costingView_->refresh();     break;
+        case 5: quoteView_->refresh();       break;
+        case 6: changeOrderView_->refresh(); break;
     }
 }
 
@@ -314,18 +394,5 @@ void App::toggleTheme()
     } else {
         appShell_->setStyleClass("app-shell theme-light");
         themeToggle_->setText("<span class=\"toggle-icon\">&#9789;</span> Dark");
-    }
-}
-
-void App::refreshCurrentView()
-{
-    switch (activeNavIndex_) {
-        case 0: dashboardView_->refresh();   break;
-        case 1: resourceView_->refresh();    break;
-        case 2: componentView_->refresh();   break;
-        case 3: sprintView_->refresh();      break;
-        case 4: costingView_->refresh();     break;
-        case 5: quoteView_->refresh();       break;
-        case 6: changeOrderView_->refresh(); break;
     }
 }

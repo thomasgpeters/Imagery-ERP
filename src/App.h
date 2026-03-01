@@ -18,6 +18,8 @@ class CostingView;
 class QuoteView;
 class ChangeOrderView;
 
+enum class AppRole { Planning, Execution };
+
 class App : public Wt::WApplication {
 public:
     App(const Wt::WEnvironment& env);
@@ -31,9 +33,18 @@ private:
     Wt::WContainerWidget* topbar_;
     Wt::WContainerWidget* workarea_;
 
-    // Navigation buttons in sidebar
+    // Navigation
+    Wt::WContainerWidget* navContainer_ = nullptr;
     std::vector<Wt::WPushButton*> navButtons_;
     int activeNavIndex_ = 0;
+
+    // Role state
+    AppRole activeRole_ = AppRole::Planning;
+    Wt::WPushButton* planningRoleBtn_ = nullptr;
+    Wt::WPushButton* executionRoleBtn_ = nullptr;
+
+    // Each nav button maps to a view index in the workarea
+    std::vector<int> navViewMap_;
 
     // Theme state
     bool darkMode_ = false;
@@ -43,7 +54,9 @@ private:
     // Sidebar brand (updated by Settings)
     Wt::WText* brandNameText_ = nullptr;
 
-    // Views
+    // Views — stored in workarea in fixed order:
+    //   0=Dashboard, 1=Roles&Rates, 2=Components, 3=Sprints,
+    //   4=CostAnalysis, 5=QuoteBuilder, 6=ChangeOrders
     DashboardView*   dashboardView_   = nullptr;
     ResourceView*    resourceView_    = nullptr;
     ComponentView*   componentView_   = nullptr;
@@ -55,9 +68,11 @@ private:
     void buildLayout();
     void buildSidebar();
     void buildTopbar();
-    void showView(int index);
+    void buildNavForRole();
+    void switchRole(AppRole role);
+    void showView(int viewIndex);
     void toggleTheme();
-    void setNavActive(int index);
-    void refreshCurrentView();
+    void setNavActive(int navIdx);
+    void refreshView(int viewIndex);
     void showSettingsDialog();
 };

@@ -318,6 +318,36 @@ body > div,
     color: var(--text-sidebar);
 }
 
+/* Role Switcher */
+.role-switcher {
+    display: flex;
+    gap: 4px;
+    padding: 4px 12px;
+}
+.role-btn {
+    flex: 1;
+    padding: 7px 0;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-sidebar);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    letter-spacing: 0.3px;
+}
+.role-btn:hover {
+    background: var(--bg-sidebar-hover);
+    color: var(--text-sidebar-active);
+}
+.role-btn.active {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border-color: var(--accent-blue);
+}
+
 /* Navigation */
 .sidebar-nav {
     flex: 1;
@@ -812,44 +842,22 @@ body > div,
     margin-bottom: 12px;
     line-height: 1.5;
 }
-.sprint-components {
-    margin: 8px 0;
+/* Sprint component table */
+.sprint-comp-table {
+    margin-top: 8px;
 }
-.sprint-comp-item-wrap {
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    margin-bottom: 6px;
-    background: var(--bg-tertiary);
-    font-size: 13px;
-    overflow: hidden;
+.sprint-comp-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
 }
-.sprint-comp-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-}
-.sprint-comp-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    margin-bottom: 6px;
-    background: var(--bg-tertiary);
-    font-size: 13px;
-}
-.comp-name  { flex: 1; font-weight: 500; color: var(--text-primary); }
-.comp-hours { color: var(--text-secondary); font-weight: 500; min-width: 60px; text-align: right; }
-.comp-cost  { color: var(--accent-blue); font-weight: 600; min-width: 90px; text-align: right; }
 .sprint-sow {
     display: block;
-    padding: 6px 12px 10px;
     font-size: 12px;
     line-height: 1.5;
     color: var(--text-secondary);
-    border-top: 1px solid var(--border-color);
+    margin-top: 4px;
 }
 
 .sprint-ceremony-summary {
