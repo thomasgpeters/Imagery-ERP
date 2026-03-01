@@ -778,8 +778,10 @@ body > div,
 }
 .input-sm   { min-width: 80px; max-width: 100px; }
 .input-wide { min-width: 280px; flex: 1; }
-.input-wide-xl { min-width: 560px; flex: 1; }
-.input-wide-lg { min-width: 532px; flex: 1; }
+.input-wide-xl { width: 560px; max-width: 560px; }
+.input-wide-lg { width: 532px; max-width: 532px; }
+/* Shrink-wrap table cell to its input content */
+.cell-shrink { width: 1px; white-space: nowrap; }
 .input-textarea {
     width: 100%;
     padding: 10px 14px;

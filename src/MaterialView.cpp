@@ -64,6 +64,7 @@ void MaterialView::refresh()
         double totalCost = totalQty * mat.unitCost;
 
         // Editable name
+        table->elementAt(row, 0)->setStyleClass("cell-shrink");
         auto nameEdit = table->elementAt(row, 0)->addWidget(std::make_unique<Wt::WLineEdit>(mat.name));
         nameEdit->setStyleClass("input-field input-wide-lg");
         int matIdx = m;
