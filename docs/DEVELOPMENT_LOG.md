@@ -427,4 +427,159 @@ Changed material IDs from 20–28 → 1–9 and updated all 14 component materia
 
 ---
 
+## Session 6 — UI Polish: Role Switching, About Dialog, Settings Dialog, Logo Branding
+
+**Date:** 2026-03-01
+**Branches:** `claude/add-architecture-switch-DvIih`, `claude/style-about-close-button-1IiGd`
+
+### Objectives
+
+1. Add role-based architecture switching (Planner vs. Executor) with sidebar navigation updates.
+2. Add company logo branding to the sidebar.
+3. Add About Imagery ERP dialog with close behaviors.
+4. Polish the Settings dialog UI.
+5. Fix CSS scoping issues for dialogs rendered outside the theme container.
+
+### Work Completed
+
+#### 1. Role-Based Navigation (App.cpp)
+
+Implemented `AppRole` enum (`Planning`, `Execution`) with dynamic sidebar navigation:
+- **Planning role** — Dashboard, Roles & Rates, Components & SoW, Materials & Expenses, Cost Analysis, Quote Builder
+- **Execution role** — Dashboard, Sprints & Agile, Change Orders
+- User profile dropdown with role switcher, Settings, and About items
+- Role icon: pencil (blue) for Planning, play (green) for Execution
+- User title updates: "Planning Manager" vs. "Project Manager"
+
+#### 2. Company Logo & Branding
+
+- Added `ImageryBusinessLogo.png` (dark variant) and `ImageryBusinessLogo_white.png` (light variant) to `resources/images/`
+- Sidebar displays the white logo variant on the dark background
+- About dialog displays the dark logo variant on white background
+- Logo sizing: sidebar max 220x90px, About max 160x50px
+
+#### 3. About Imagery ERP Dialog
+
+Full modal dialog with:
+- Company logo (centered)
+- Application description paragraph
+- Version number and copyright notice
+- Close X button in titlebar (float right, pointer cursor, hover/active states with transitions)
+- Close button in footer
+- Click-outside-to-close (backdrop click via JavaScript)
+- Escape key to close
+- White background with 0.25px rounded border
+
+#### 4. Settings Dialog Polish
+
+- Added gear icon (&#9881;) before "Settings" title text via `insertWidget(0, ...)`
+- Fixed **invisible Save/Cancel buttons** — root cause: dialogs are created via `addChild()` which places them outside the `.theme-light`/`.theme-dark` DOM container, so CSS variables (`var(--accent-blue)`, `var(--bg-tertiary)`, etc.) resolve to nothing. Fixed by replacing all CSS variable references in dialog styles with hardcoded color values.
+- White background throughout (dialog, body, titlebar, content, footer)
+- Thin 0.25px borders matching the About dialog style
+
+#### 5. Additional CSS Fixes
+
+- Table cell padding for Role Name and Material Name columns
+- Input field width constraints (2x for roles, 1.9x for materials)
+- Shrink-wrap cells around input content
+- User dropdown opacity and styling
+- About close X: smooth transitions (0.15s), hover background, active press effect (scale 0.92), user-select: none
+
+### Commits (across multiple PRs)
+
+| Hash | Message |
+|------|---------|
+| `e771254` | Replace sidebar logo placeholder with Imagery branded logos |
+| `0d81f70` | Add About Imagery ERP dialog; fix sidebar logo and dropdown opacity |
+| `dbbfb23` | Fix About dialog: smaller logo, white background, light gray border |
+| `7c209e2` | Style About dialog description as a centered well with left-justified text |
+| `c1c37df` | Add close-on-click-anywhere and X close button to About dialog |
+| `bdd631e` | Style About close button with reactive hover/active states and fix Settings dialog transparency |
+| `dd87c8e` | Add gear icon to Settings titlebar and fix invisible dialog buttons |
+| `0c1e0fc` | Increase sidebar logo size |
+
+### Key Bug Fix: CSS Variable Scoping
+
+Wt's `addChild()` appends dialogs to the application root, which is **outside** the `.theme-light`/`.theme-dark` class container. All CSS custom properties defined under those theme classes (50+ variables) are unavailable inside dialogs. This caused:
+- `.btn-primary` → `background: var(--accent-blue)` → transparent + `color: white` → invisible button
+- `.btn-secondary` → same issue with `var(--bg-tertiary)` and `var(--text-primary)`
+- Only visible on hover because hover styles used hardcoded `#1d4ed8`
+
+**Resolution:** Replaced all CSS variable references in `.settings-dialog`, `.about-dialog`, `.settings-footer`, and `.about-footer` rules with hardcoded hex colors.
+
+---
+
+## Session 7 — Documentation Wrap-Up & UAT Testing Guide
+
+**Date:** 2026-03-01
+**Branch:** `claude/style-about-close-button-1IiGd`
+
+### Objectives
+
+Finalize project documentation for Phase 1 completion and prepare UAT testing materials for both Planner and Executor roles.
+
+### Work Completed
+
+#### 1. UAT Testing Guide (`docs/UAT_TESTING.md`)
+
+Created a comprehensive 120-test UAT guide organized into three chapters:
+
+- **Chapter 1 — Planner Role** (61 tests)
+  - Role Switching (5 tests)
+  - Dashboard (11 tests)
+  - Roles & Rates (13 tests)
+  - Components & SoW (19 tests)
+  - Materials & Expenses (13 tests)
+  - Cost Analysis (15 tests)
+  - Quote Builder (19 tests)
+
+- **Chapter 2 — Executor Role** (31 tests)
+  - Role Switching (5 tests)
+  - Dashboard (2 tests)
+  - Sprints & Agile (16 tests)
+  - Change Orders (15 tests)
+
+- **Chapter 3 — Cross-Cutting Features** (28 tests)
+  - Theme Toggle (8 tests)
+  - Settings Dialog (15 tests)
+  - About Dialog (14 tests)
+  - Responsive Layout (6 tests)
+
+Each test has a numbered step, expected result, and pass/fail column. Includes a sign-off table for testers.
+
+#### 2. User Guide (`docs/USER_GUIDE.md`)
+
+Created a complete end-user guide covering:
+- Getting started and application layout
+- Role descriptions (Planner vs. Executor)
+- Planner workflow: Dashboard, Roles & Rates, Components & SoW, Materials & Expenses, Cost Analysis, Quote Builder
+- Executor workflow: Dashboard, Sprints & Agile, Change Orders
+- Settings & preferences (business name, theme toggle, About dialog)
+- Keyboard and navigation tips
+
+#### 3. Development Log Update (`docs/DEVELOPMENT_LOG.md`)
+
+Added Session 6 (UI polish) and Session 7 (this documentation session) entries with full details, commit hashes, and statistics.
+
+#### 4. Development Options Update (`docs/DEVELOPMENT_OPTIONS.md`)
+
+Added Section 12 (Dialog Architecture & CSS Scoping) documenting the CSS variable scoping issue and resolution, and updated Section 11 (Future Considerations) with Phase 1 completion status.
+
+#### 5. README Update
+
+Updated the Documentation table to include the new UAT_TESTING.md and USER_GUIDE.md files.
+
+### Statistics
+
+| Category | Count |
+|----------|-------|
+| New documentation files | 2 (UAT_TESTING.md, USER_GUIDE.md) |
+| Updated documentation files | 3 (DEVELOPMENT_LOG.md, DEVELOPMENT_OPTIONS.md, README.md) |
+| UAT test cases | 120 |
+| Total source lines (C++ + CSS) | 5,345 |
+| CSS lines (style.css) | 1,454 |
+| Total documentation pages | 7 |
+
+---
+
 *This log is maintained as the project evolves. Each development session adds a new dated entry with objectives, work completed, and relevant details.*

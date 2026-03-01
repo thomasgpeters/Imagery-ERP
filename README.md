@@ -32,7 +32,7 @@ The application follows a **three-tier architecture**:
 The application uses a **sidebar + top navigation bar** layout:
 
 - **Top Bar** — Company branding on the left; theme toggle (light/dark) and user profile on the right
-- **Sidebar** — Project name, client name, and seven navigation sections:
+- **Sidebar** — Project name, client name, and role-based navigation (6 items for Planning, 3 for Execution):
 
 | Section | Description |
 |---------|-------------|
@@ -176,7 +176,9 @@ Imagery-ERP/
 │   └── seed_data.sql           # Sample data (roles, components, sprints, estimate)
 ├── docs/
 │   ├── DEVELOPMENT_LOG.md      # Development history and session notes
-│   └── DEVELOPMENT_OPTIONS.md  # Architecture decisions, libraries, techniques
+│   ├── DEVELOPMENT_OPTIONS.md  # Architecture decisions, libraries, techniques
+│   ├── UAT_TESTING.md          # 120-test UAT guide (Planner + Executor roles)
+│   └── USER_GUIDE.md           # Complete end-user guide
 ├── resources/
 │   └── style.css               # Professional stylesheet (light + dark themes)
 └── src/
@@ -198,12 +200,14 @@ Imagery-ERP/
 | Document | Description |
 |----------|-------------|
 | [README.md](README.md) | Executive summary, usage guide, build and run instructions, project structure |
-| [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md) | Chronological development history — session-by-session record of objectives, work completed, commits, and statistics (data model design, schema creation, seed data, Wt application views, stylesheet, build system) |
-| [docs/DEVELOPMENT_OPTIONS.md](docs/DEVELOPMENT_OPTIONS.md) | Architecture and design decisions — three-tier rationale, Wt evaluation vs alternatives (Qt, CppCMS, Drogon, Flask), ApiLogicServer choice, PostgreSQL vs SQLite/MySQL/MongoDB, CSS theming approach, data model patterns (roles vs resources, component-resource junction, estimate assembly), business logic placement strategy, security considerations, and future roadmap |
-| [database/schema.sql](database/schema.sql) | PostgreSQL schema — 23 tables, 8 computed views, 4 stored functions, 13 auto-update triggers, 2 extensions, all within the `ppc` schema namespace |
-| [database/seed_data.sql](database/seed_data.sql) | Sample dataset — 1 company, 3 users, 8 roles with rates, 10 resources, 5 Agile ceremonies, 1 project with 5 phases, 15 components with full Statement of Work text, 6 sprints, 96 week-allocation records, 1 estimate, 1 change order with 5 line items |
+| [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Complete end-user guide — application layout, Planner workflow (Dashboard, Roles & Rates, Components & SoW, Materials, Cost Analysis, Quote Builder), Executor workflow (Sprints & Agile, Change Orders), Settings, theme toggle, keyboard tips |
+| [docs/UAT_TESTING.md](docs/UAT_TESTING.md) | User Acceptance Testing guide — 120 test cases across 3 chapters: Planner Role (61 tests), Executor Role (31 tests), Cross-Cutting Features (28 tests) with step-by-step scenarios and pass/fail tracking |
+| [docs/DEVELOPMENT_LOG.md](docs/DEVELOPMENT_LOG.md) | Chronological development history — 7 sessions covering data model design, schema creation, seed data, Wt application views, materials capability, formatting, UI polish, and documentation |
+| [docs/DEVELOPMENT_OPTIONS.md](docs/DEVELOPMENT_OPTIONS.md) | Architecture and design decisions — three-tier rationale, Wt evaluation, ApiLogicServer choice, PostgreSQL design, CSS theming, data model patterns, dialog CSS scoping issue, Phase 1 completion status, and future roadmap |
+| [database/schema.sql](database/schema.sql) | PostgreSQL schema — 25 tables, 10 computed views, 5 stored functions, 15 auto-update triggers, 2 extensions, all within the `ppc` schema namespace |
+| [database/seed_data.sql](database/seed_data.sql) | Sample dataset — 1 company, 3 users, 8 roles with rates, 10 resources, 9 materials, 5 Agile ceremonies, 1 project with 5 phases, 15 components with SoW text, 6 sprints, 96 week-allocation records, 1 estimate, 1 change order with 5 line items |
 | [CMakeLists.txt](CMakeLists.txt) | Build configuration — CMake 3.14+, C++17, dual Wt detection (config mode + fallback), optional libharu for PDF, macOS warning suppression |
-| [resources/style.css](resources/style.css) | Stylesheet — 50+ CSS custom properties, full light and dark theme support, sidebar/topbar/workarea layout, data tables, metric cards, sprint/estimate/change-order cards, e-signature styling, responsive breakpoints, print stylesheet |
+| [resources/style.css](resources/style.css) | Stylesheet — 1,454 lines, 50+ CSS custom properties, full light and dark theme support, sidebar/topbar/workarea layout, data tables, metric cards, sprint/estimate/change-order cards, e-signature styling, responsive breakpoints, print stylesheet |
 
 ## License
 

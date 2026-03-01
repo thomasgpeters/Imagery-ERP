@@ -17,6 +17,7 @@ This document captures the architectural decisions, library evaluations, design 
 9. [Formatting & Display Utilities](#9-formatting--display-utilities)
 10. [Security Considerations](#10-security-considerations)
 11. [Future Considerations](#11-future-considerations)
+12. [Dialog Architecture & CSS Scoping](#12-dialog-architecture--css-scoping)
 
 ---
 
@@ -459,7 +460,84 @@ CSS styling for `.Wt-datepicker` provides hover states, selected-day highlight, 
 
 ---
 
+## 12. Dialog Architecture & CSS Scoping
+
+### Issue: CSS Variables Unavailable in Dialogs
+
+Wt's `addChild()` method appends dialog widgets to the application root, which is **outside** the `.theme-light` / `.theme-dark` class container (`appShell_`). Since all 50+ CSS custom properties are defined under `.theme-light { ... }` and `.theme-dark { ... }`, they do not cascade into dialogs.
+
+**DOM Structure:**
+```
+<body>
+  <div class="wt-root">
+    <div class="app-shell theme-light">     ← CSS variables defined here
+      <div class="app-sidebar">...</div>
+      <div class="app-main">...</div>
+    </div>
+  </div>
+  <div class="Wt-dialogcover">...</div>
+  <div class="settings-dialog Wt-dialog">   ← Outside theme scope!
+    ...buttons using var(--accent-blue)...   ← Resolves to nothing
+  </div>
+</body>
+```
+
+**Symptoms:**
+- `.btn-primary` buttons invisible (transparent background + white text on white)
+- `.btn-secondary` buttons invisible (transparent background + unresolved text color)
+- Both buttons become visible on hover because hover styles used hardcoded `#1d4ed8`
+
+**Resolution:**
+All CSS rules for `.settings-dialog`, `.about-dialog`, `.settings-footer`, and `.about-footer` were converted from CSS variable references to hardcoded hex color values:
+
+```css
+/* Before (broken): */
+.settings-footer .btn-primary {
+    background: var(--accent-blue);  /* → nothing */
+    color: white;                     /* → invisible */
+}
+
+/* After (fixed): */
+.settings-footer .btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+```
+
+**Alternative Approaches Considered:**
+
+| Approach | Pros | Cons | Decision |
+|----------|------|------|----------|
+| Move CSS variables to `:root` | All elements inherit them | Loses per-theme scoping; dark mode requires JS class on `<html>` | Rejected |
+| Clone theme class onto dialog | Variables resolve naturally | Fragile; must sync on every theme toggle | Rejected |
+| **Hardcode dialog colors** | Simple, reliable, no sync issues | Must update in two places if palette changes | **Selected** |
+
+This is a Wt-specific architectural constraint. If the application migrates to a React or vanilla HTML frontend in the future, CSS variables can be moved to `:root` and this workaround removed.
+
+---
+
 ## 11. Future Considerations
+
+### Phase 1 Status: Complete
+
+The following capabilities are fully implemented and ready for UAT:
+
+| Feature | Status |
+|---------|--------|
+| Role & rate management | Complete |
+| Component estimating with SoW | Complete |
+| Material & expense tracking | Complete |
+| Weekly hours/cost allocation grid | Complete |
+| Sprint planning with Agile ceremonies | Complete |
+| Quote builder with e-signature | Complete |
+| Change order workflow | Complete |
+| Light/dark theme | Complete |
+| Role-based navigation (Planner/Executor) | Complete |
+| Settings dialog (business name) | Complete |
+| About dialog | Complete |
+| Currency/date formatting | Complete |
+| PDF export (placeholder) | Stubbed |
+| Email delivery (placeholder) | Stubbed |
 
 ### Near-Term
 
