@@ -160,46 +160,70 @@ void SprintView::refresh()
             ));
         }
 
-        // Components in this sprint
+        // Components in this sprint — rendered as a table grid
         if (!sprint.componentIds.empty()) {
-            auto compList = sprintCard->addWidget(std::make_unique<Wt::WContainerWidget>());
-            compList->setStyleClass("sprint-components");
+            auto compTable = sprintCard->addWidget(std::make_unique<Wt::WTable>());
+            compTable->setStyleClass("data-table sprint-comp-table");
+            compTable->setHeaderCount(1);
+
+            // Header
+            compTable->elementAt(0, 0)->addWidget(std::make_unique<Wt::WText>("Component"));
+            compTable->elementAt(0, 1)->addWidget(std::make_unique<Wt::WText>("Hours"));
+            compTable->elementAt(0, 1)->setStyleClass("cell-right");
+            compTable->elementAt(0, 2)->addWidget(std::make_unique<Wt::WText>("Cost"));
+            compTable->elementAt(0, 2)->setStyleClass("cell-right");
+
+            int tableRow = 1;
+            double sprintTotalHrs = 0;
+            double sprintTotalCost = 0;
 
             for (int cid : sprint.componentIds) {
                 for (auto& comp : data_.components) {
                     if (comp.id == cid) {
                         double hrs = comp.totalHours();
                         double cost = data_.componentCost(comp);
+                        sprintTotalHrs += hrs;
+                        sprintTotalCost += cost;
 
-                        auto compItem = compList->addWidget(std::make_unique<Wt::WContainerWidget>());
-                        compItem->setStyleClass("sprint-comp-item-wrap");
+                        // Component name + SoW (name in bold, SoW below in muted)
+                        auto nameCell = compTable->elementAt(tableRow, 0);
+                        auto nameW = nameCell->addWidget(
+                            std::make_unique<Wt::WText>(comp.name, Wt::TextFormat::Plain));
+                        nameW->setStyleClass("sprint-comp-name");
 
-                        // Header row: name | hours | cost — built with widgets to avoid XHTML escaping issues
-                        auto row = compItem->addWidget(std::make_unique<Wt::WContainerWidget>());
-                        row->setStyleClass("sprint-comp-row");
-
-                        auto nameW = row->addWidget(std::make_unique<Wt::WText>(comp.name, Wt::TextFormat::Plain));
-                        nameW->setStyleClass("comp-name");
-
-                        auto hrsW = row->addWidget(std::make_unique<Wt::WText>(
-                            ppc::formatNumber(hrs, 0) + " hrs", Wt::TextFormat::Plain));
-                        hrsW->setStyleClass("comp-hours");
-
-                        auto costW = row->addWidget(std::make_unique<Wt::WText>(
-                            ppc::formatCurrency(cost), Wt::TextFormat::Plain));
-                        costW->setStyleClass("comp-cost");
-
-                        // SoW text
                         if (!comp.statementOfWork.empty()) {
-                            auto sowText = compItem->addWidget(
+                            auto sowW = nameCell->addWidget(
                                 std::make_unique<Wt::WText>(comp.statementOfWork, Wt::TextFormat::Plain));
-                            sowText->setStyleClass("sprint-sow");
+                            sowW->setStyleClass("sprint-sow");
                         }
+                        nameCell->setStyleClass("cell-desc");
 
+                        // Hours
+                        compTable->elementAt(tableRow, 1)->addWidget(std::make_unique<Wt::WText>(
+                            ppc::formatNumber(hrs, 0)));
+                        compTable->elementAt(tableRow, 1)->setStyleClass("cell-right");
+
+                        // Cost
+                        compTable->elementAt(tableRow, 2)->addWidget(std::make_unique<Wt::WText>(
+                            ppc::formatCurrency(cost)));
+                        compTable->elementAt(tableRow, 2)->setStyleClass("cell-right");
+
+                        tableRow++;
                         break;
                     }
                 }
             }
+
+            // Totals row
+            compTable->elementAt(tableRow, 0)->addWidget(ppc::xhtml("<strong>Sprint Total</strong>"));
+            compTable->elementAt(tableRow, 1)->addWidget(std::make_unique<Wt::WText>(
+                ppc::formatNumber(sprintTotalHrs, 0)));
+            compTable->elementAt(tableRow, 1)->setStyleClass("cell-right");
+            compTable->elementAt(tableRow, 2)->addWidget(std::make_unique<Wt::WText>(
+                ppc::formatCurrency(sprintTotalCost)));
+            compTable->elementAt(tableRow, 2)->setStyleClass("cell-right");
+            for (int col = 0; col < 3; col++)
+                compTable->elementAt(tableRow, col)->addStyleClass("total-row");
         }
 
         // Ceremony summary for this sprint
